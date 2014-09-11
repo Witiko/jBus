@@ -1,0 +1,252 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>jBus test suite</title>
+    <script>
+    
+      // # The Path object #
+      
+      /**
+       * The Path object represents a path within an
+       * ordinary object.
+       */
+      function Path() {  }
+      
+      /**
+       * The AbsolutePath function constructs a AbsolutePath
+       * object, which represents a path within an ordinary
+       * object. If the first parameter is an array of strings,
+       * a copy of the array is adopted as the path. Otherwise,
+       * the array of parameters is used as the path. The array
+       * must not contain the ".." string.
+       */
+      function AbsolutePath(array) {
+      
+        // Overloading support
+        if( isArray( array ) ) {
+          AbsolutePath.apply( this, array );
+        } else {
+          this.path = new$Array( arguments );
+          if( $Array.contains( this.path, ".." ) ) {
+            throw new TypeError( "The passed array is not an absolute path." );
+          }
+        }
+        
+      } AbsolutePath.prototype = new Path;
+      
+      /**
+       * The RelativePath function constructs a RelativePath
+       * object, which represents a path within an ordinary
+       * object. If the first parameter is an array of strings,
+       * a copy of the array is adopted as the path. Otherwise,
+       * the array of parameters is used as the path.
+       */
+      function RelativePath(array) {
+      
+        // Overloading support
+        if( isArray( array ) ) {
+          RelativePath.apply( this, array );
+        } else {       
+          this.path = new$Array( arguments );
+        }
+        
+      } RelativePath.prototype = new Path;
+      
+      /**
+       * Using the current path and the given relative path,
+       * the method returns a new path, which reflects the
+       * application of the given relative path to the current
+       * path. A relative path can contain the following strings:
+       *
+       *   ".." -- The last entry of the current path is removed
+       *
+       * @param relative The given relative path.
+       * @return A new path, which reflects the application of
+       *         the given relative path to the current path.
+       */
+      Path.prototype.change = function(relative) {
+        if( !(relative instanceof RelativePath) ) {
+          throw new TypeError( "The relative parameter is not a relative path." );
+        }
+        
+        var path = new$Array( this.path );
+          $Array.forEach( relative.path, function(fragment) {
+            if( fragment === ".." ) {
+              path.pop();
+            } else {
+              path.push( fragment );
+            }
+          });
+        return (this instanceof RelativePath) ?
+          new RelativePath( path ) :
+          new AbsolutePath( path );
+      };
+      
+      /**
+       * Applies the current absolute path to an object and returns
+       * the result.
+       *
+       * @return The result of the application of the current
+       *         absolute path to the object.
+       */
+      AbsolutePath.prototype.apply = function(object) {
+        $Array.forEach( this.path, function(fragment) {
+          if( fragment === ".." || fragment === "." ) {
+          } object = object[fragment];
+        }); return object;
+      };
+      
+    </script>
+    <script src="framework.js"></script>
+    <script src="test.js"></script>
+    <script src="jBus.js"></script>
+    <style>
+      p {
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 1.5em;
+      } h2 {
+        margin-left: 0.5em;
+      } h1 {
+        margin-left: 0;
+      } .success {
+        color: #080;
+      } .failure {
+        color: #800;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>JavaScript is disabled.</noscript>
+    <script>
+      
+      // We create a main header
+      var h1 = document.createElement( "h1" );
+      h1.appendChild( document.createTextNode( "Tests" ) );
+      document.body.appendChild( h1 );
+      var globalProgress = {
+        categories: {
+          successful: 0,
+          total: countItems(tests)
+        }
+      };      
+      if(globalProgress.categories.total === 0) {
+        success(h1);
+      }
+      
+      // We create a sub-header for each category
+      for(var i in tests) (function(i) {
+        var h2 = document.createElement( "h2" );
+        h2.appendChild( document.createTextNode( i ) );
+        document.body.appendChild( h2 );
+        var progress = {
+          categories: globalProgress.categories,
+          tests: {
+            successful: 0,
+            total: countItems(tests[i])
+          }
+        };
+        if(progress.tests.total === 0) {
+          success(h2);
+          if(++progress.categories.successful === progress.categories.total) {
+            success(h1);
+          }
+        }
+        
+        // We create a paragraph for each test
+        for(var j in tests[i]) (function(j) {
+          var p = document.createElement( "p" );
+          p.className = "pending";
+          var b = document.createElement( "b" );
+          b.appendChild( document.createTextNode( j ) );
+          p.appendChild( b );
+          document.body.appendChild( p );
+          
+          // We either call a function, or we resolve a symlink
+          var test = tests[i][j];
+          if(test instanceof Path) {
+            if(test instanceof AbsolutePath) {
+              // We resolve an absolute path
+              test = test.apply( tests );
+            } else {
+              // We resolve a relative path
+              test = new AbsolutePath( i ).change( test ).apply( tests );
+            }
+          }
+
+          try {
+            test(function() {
+              if(p.className !== "success") {
+                success(p);
+                if(++progress.tests.successful === progress.tests.total) {
+                  success(h2);
+                  if(++progress.categories.successful === progress.categories.total) {
+                    success(h1);
+                  }
+                }
+              }
+            }, testFailure);
+          } catch(e) {
+            testFailure(e);
+          }
+
+          function testFailure(e) {
+            if(p.className === "success") {
+              if(progress.tests.successful-- === progress.tests.total) {
+                progress.categories.successful--;
+              }
+            } failure(p, e);
+            failure(h2);
+            failure(h1);
+          }
+
+        })(j); 
+      })(i);
+      
+      // # Utility functions #
+      
+      /**
+       * Visually marks the given element as successful.
+       * @param el - The given element.
+       */
+      function success(el) {
+        if( el.className !== "success" ) {
+          if( el.className === "failure" ) {
+            el.removeChild( el.childNodes[el.childNodes.length - 1] );
+          } el.appendChild( document.createTextNode( " – OK" ) );
+          el.className = "success";
+        }
+      }
+      
+      /**
+       * Visually marks the given element as failed.
+       * @param el - The given element.
+       */
+      function failure(el, e) {
+        if( e instanceof Error ) {
+          el.title = e.name + "\n" + e.message;
+        } if( el.className !== "failure" ) {
+          if( el.className === "success" ) {
+            el.removeChild( el.childNodes[el.childNodes.length - 1] );
+          } el.appendChild( document.createTextNode( " – " +
+            ( e instanceof Error ? "UNCAUGHT EXCEPTION" : "FAIL" )));
+          el.className = "failure";
+        }
+      }
+      
+      /**
+       * Counts the number of items in the given object.
+       * @param obj the given object.
+       * @return the number of items in the given object.
+       */
+      function countItems(obj) {
+        var count = 0;
+        for(var j in obj) {
+          count++;
+        } return count;
+      }
+
+    </script>
+  </body>
+</html>
