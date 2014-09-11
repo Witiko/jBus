@@ -30,7 +30,7 @@ removeHeadingLevels() {
 DOC=$( eval echo '$'$(echo "$#") )
 # The annotation regex
 REGEX='\s*//\s*@\s*annotate\s*'
-# The total number of lines in "$1"
+# The total number of lines in the documentation
 TOTAL=$( cat "$DOC" | sed -e '$a\' | wc -l )
 IFS=;
 
