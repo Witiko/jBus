@@ -27,7 +27,7 @@ removeHeadingLevels() {
 }
 
 # The documentation
-DOC=$(eval echo '$'$(echo "$#"))
+DOC=$( eval echo '$'$(echo "$#") )
 # The annotation regex
 REGEX='\s*//\s*@\s*annotate\s*'
 # The total number of lines in "$1"
