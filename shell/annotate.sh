@@ -48,7 +48,7 @@ fi) | while read -r "line" || [ -n "$line" ]; do
     LEVEL=$(( $( tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | head -n 1 | sed 's/[^#].*//' | wc -c ) - 1 ))
     # The length of the included section in lines
     LINES=$( tail -n $(( $TOTAL - $FROM )) "$DOC" | grep -n '^#\{1,'$LEVEL'\} ' | head -n 1 | sed 's/:.*//' )
-
+    # We include the entire section as a javadoc comment
     tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | (
       if [ -z "$LINES" ]; then
         cat # We will print the entire rest of the document
