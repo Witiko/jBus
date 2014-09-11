@@ -31,7 +31,7 @@ DOC=$( eval echo '$'$(echo "$#") )
 # The annotation regex
 REGEX='\s*//\s*@\s*annotate\s*'
 # The total number of lines in "$1"
-TOTAL=$( wc -l "$DOC" | sed 's/ .*//' )
+TOTAL=$( cat "$DOC" | sed -e '$a\' | wc -l )
 IFS=;
 
 (if [ $# -lt 2 ]; then
@@ -45,11 +45,11 @@ fi) | while read -r "line" || [ -n "$line" ]; do
     # The starting line of the included section
     FROM=$( grep -F -n '# '"$( printf "%s" "$line" | sed "s#$REGEX##" )" "$DOC" | sed 's/:.*//' )
     # The heading level of the included section
-    LEVEL=$(( $( tail -n $(( $TOTAL - $FROM + 2 )) "$DOC" | head -n 1 | sed 's/[^#].*//' | wc -c ) - 1 ))
+    LEVEL=$(( $( tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | head -n 1 | sed 's/[^#].*//' | wc -c ) - 1 ))
     # The length of the included section in lines
-    LINES=$( tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | grep -n '^#\{1,'$LEVEL'\} ' | head -n 1 | sed 's/:.*//' )
+    LINES=$( tail -n $(( $TOTAL - $FROM )) "$DOC" | grep -n '^#\{1,'$LEVEL'\} ' | head -n 1 | sed 's/:.*//' )
 
-    tail -n $(( $TOTAL - $FROM + 2 )) "$DOC" | (
+    tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | (
       if [ -z "$LINES" ]; then
         cat # We will print the entire rest of the document
       else
