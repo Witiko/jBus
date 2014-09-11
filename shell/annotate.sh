@@ -1,6 +1,6 @@
 #!/bin/sh
-# Automagically annotates the "$2" file according to the the "$1" markdown documentation
-# If left out, "$2" is considered to be stdin
+# Automagically annotates the "$1" file according to the the "$2" markdown documentation
+# If only one argument is passed to the script, then stdin is annotated according to the the "$1" markdown documentation
 
 # Indents the input by $1 spaces
 indent() {
@@ -26,10 +26,12 @@ removeHeadingLevels() {
   sed 's/^#\{1,'$1'\}//;s/#\{1,'$1'\}$//'
 }
 
+# The documentation
+DOC=$(eval echo '$'$(echo "$#"))
 # The annotation regex
 REGEX='\s*//\s*@\s*annotate\s*'
 # The total number of lines in "$1"
-TOTAL=$( wc -l "$2" | sed 's/ .*//' )
+TOTAL=$( wc -l "$DOC" | sed 's/ .*//' )
 IFS=;
 
 (if [ $# -lt 2 ]; then
@@ -41,13 +43,13 @@ fi) | while read -r "line" || [ -n "$line" ]; do
     # The number of spaces preceding the regex
     SPACES=$(( $( printf "%s" "$line" | sed 's/[^ ].*//' | wc -c ) ))
     # The starting line of the included section
-    FROM=$( grep -F -n '# '"$( printf "%s" "$line" | sed "s#$REGEX##" )" "$2" | sed 's/:.*//' )
+    FROM=$( grep -F -n '# '"$( printf "%s" "$line" | sed "s#$REGEX##" )" "$DOC" | sed 's/:.*//' )
     # The heading level of the included section
-    LEVEL=$(( $( tail -n $(( $TOTAL - $FROM + 2 )) "$2" | head -n 1 | sed 's/[^#].*//' | wc -c ) - 1 ))
+    LEVEL=$(( $( tail -n $(( $TOTAL - $FROM + 2 )) "$DOC" | head -n 1 | sed 's/[^#].*//' | wc -c ) - 1 ))
     # The length of the included section in lines
-    LINES=$( tail -n $(( $TOTAL - $FROM + 1 )) "$2" | grep -n '^#\{1,'$LEVEL'\} ' | head -n 1 | sed 's/:.*//' )
+    LINES=$( tail -n $(( $TOTAL - $FROM + 1 )) "$DOC" | grep -n '^#\{1,'$LEVEL'\} ' | head -n 1 | sed 's/:.*//' )
 
-    tail -n $(( $TOTAL - $FROM + 2 )) "$2" | (
+    tail -n $(( $TOTAL - $FROM + 2 )) "$DOC" | (
       if [ -z "$LINES" ]; then
         cat # We will print the entire rest of the document
       else
