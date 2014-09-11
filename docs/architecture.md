@@ -140,10 +140,10 @@ A node has several properties:
 
 A node notifies the application of the changes of its states. The application can perform any of the following actions with the node:
 
-  1. *Listen for incoming data* -- The initialized node notifies the application of data in the incoming data messages
-  2. *Send data* -- The initialized node sends a data message containing the given data to the given address
-  3. *Initialize the node* -- The uninitalized node initializes itself
-  4. *Destroy the node* -- The non-destroyed node destroys itself
+  1. *Listen for incoming data* -- The initialized node notifies the application of data in the incoming data messages.
+  2. *Send data* -- The initialized node sends a data message containing the given data to the given address.
+  3. *Initialize the node* -- The uninitalized node initializes itself.
+  4. *Destroy the node* -- The non-destroyed node destroys itself.
   
 ### Data ###
 
