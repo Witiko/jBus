@@ -40,7 +40,7 @@ var ajaxNode = new JBus.Node({
 
 /* We send incoming chat events from the ajax
    library to the broadcast address. */
-ajax.onchatevent = function( chatEvent ) {
+ajax.onchatevent = function(chatEvent) {
   ajaxNode.send( chatEvent );
 };
 
@@ -69,7 +69,7 @@ var compNode = new JBus.Node({
 
 /* We send outgoing chat events from the component
    to the unicast address of the ajax library node. */
-component.onchatevent = function( chatEvent ) {
+component.onchatevent = function(chatEvent) {
   compNode.send({
     to: "name.witiko.jbus.examples.webchat.ajax",
     data: chatEvent
@@ -118,7 +118,7 @@ var receiverNode = new JBus.Node({
 
 /* We send incoming chat events from the ajax
    library to the broadcast address. */
-ajax.onchatevent = function( chatEvent ) {
+ajax.onchatevent = function(chatEvent) {
   receiverNode.send( chatEvent );
 };
 
@@ -198,7 +198,7 @@ var compNode = new JBus.Node({
 /* We send outgoing chat events from the component
    to the unicast address of the chat events sender
    node. */
-component.onchatevent = function( chatEvent ) {
+component.onchatevent = function(chatEvent) {
   compNode.send({
     to: "name.witiko.jbus.examples.webchat.sender",
     data: chatEvent
