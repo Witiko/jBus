@@ -186,6 +186,8 @@ If you don't want to broadcast the data globally, but only within your userscrip
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
+/* We set up a private scope along with
+   the new node. */
 var scope = new JBus.Scope,
     node = new JBus.Node({
   name: "name.witiko.jbus.examples.userscript#3",
