@@ -36,7 +36,7 @@ new JBus.Node({
 });
 ```
 
-That means that you can initialize and destroy the beacon node at will and the dependent extensions will notice right away:
+That means that you can initialize and destroy the beacon node at will and the dependent userscripts will notice right away:
 
 ```js
 // ==UserScript==
@@ -190,7 +190,7 @@ new JBus.Node().listen({
 
 ## Subscription service ##
 
-Sometimes, you want for the extensions to be able to state the paramers of the messages they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
+Sometimes, you want for the userscripts to be able to state the paramers of the messages they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
 
 ```js
 // ==UserScript==
