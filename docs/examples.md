@@ -10,7 +10,7 @@ The simplest way to use jBus in a userscript is creating a named node:
 // ==UserScript==
 // @name           An example userscript #1
 // @description    A beacon
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -22,7 +22,7 @@ This is enough for other nodes to be able react to that node's presence:
 ```js
 // ==UserScript==
 // @name           An example userscript #2
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -42,7 +42,7 @@ That means that you can initialize and destroy the beacon node at will and the d
 // ==UserScript==
 // @name           An example userscript #1
 // @description    A beacon
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -130,7 +130,7 @@ Another way of using jBus in a userscript is for broadcasting data to other user
 ```js
 // ==UserScript==
 // @name           An example userscript #3
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -146,7 +146,7 @@ Or you may decouple the processing of the mutation event and the reaction into t
 // ==UserScript==
 // @name           An example userscript #3
 // @description    A broadcast service
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -172,7 +172,7 @@ This not only makes the maintenance of the separate components of the userscript
 ```js
 // ==UserScript==
 // @name           An example userscript #4
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -196,7 +196,7 @@ Sometimes, you want for the extensions to be able to state the paramers of the m
 // ==UserScript==
 // @name           An example userscript #5
 // @description    A subscription service
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
@@ -233,7 +233,7 @@ var node = new JBus.Node({
 ```js
 // ==UserScript==
 // @name           An example userscript #6
-// @match          *://github.com/Witiko/jBus
+// @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
