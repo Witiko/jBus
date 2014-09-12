@@ -120,9 +120,7 @@ This will allow users, whose script managers don't support the `@require` metada
     
     Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listening script will be notified about your changes, you can only store textual data, while jBus allows you to pass around any kind of data including functions.
     
-    Not to mention that the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects are designed to store, rather than post data. Admittedly, this is partially mitigated by the temporary nature of the [`sessionStorage`][sessionStorage] object.
-    
-    Last, but not least, jBus allows you to [scope](docs/examples.md#scoping) your messages, while there can only be one, global instance of either one of the the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects. You can also build chains of [dependencies](docs/examples.md#dependencies) between individual jBus nodes.
+    jBus also allows you to [scope](docs/examples.md#scoping) your messages, while there can only be one, global instance of either one of the the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects. You can also build chains of [dependencies](docs/examples.md#dependencies) between individual jBus nodes.
 
 [localStorage]: http://www.w3.org/TR/webstorage/#the-localstorage-attribute "Web Storage"
 [sessionStorage]: http://www.w3.org/TR/webstorage/#the-sessionstorage-attribute "Web Storage"
