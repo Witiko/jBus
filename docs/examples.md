@@ -27,7 +27,7 @@ This is enough for other nodes to be able react to that node's presence:
 // ==/UserScript==
 
 new JBus.Node({
-  requires: "name.witiko.jbus.examples.userscript#1"
+  requires: "name.witiko.jbus.examples.userscript#1",
   oninit: function() {
     console.log( "The example userscript #1 node has been initialized." );
   }, onuninit: function() {
