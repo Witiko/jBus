@@ -64,7 +64,7 @@ function destroy() {
 We have already seen that when one of the required nodes of a node uninitializes, the node itself unitializes. Imagine the initialized nodes as a directed rooted tree, where the parent nodes are required by the child nodes. Uninitializing a parent node then makes the whole subtree collapse and then reform again as soon as the parent is reinitialized. Suppose the following code:
 
 ```js
-var a = new JBus.Node( "name.witiko.jbus.examples.root" );
+var a = new JBus.Node({ name: "name.witiko.jbus.examples.root" });
 var b = new JBus.Node({ name: "name.witiko.jbus.examples.sub1", requires: "name.witiko.jbus.examples.root" });
 var c = new JBus.Node({ name: "name.witiko.jbus.examples.sub2", requires: "name.witiko.jbus.examples.root" });
 var d = new JBus.Node({ name: "name.witiko.jbus.examples.sub3", requires: "name.witiko.jbus.examples.root" });
