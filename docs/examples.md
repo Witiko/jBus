@@ -212,7 +212,7 @@ new JBus.Node({ scope: scope }).listen({
 
 ## Subscription service ##
 
-Sometimes, you want for the userscripts to be able to state the paramers of the messages they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
+Sometimes, you want for the userscripts to be able to state the paramers of the data they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
 
 ```js
 // ==UserScript==
