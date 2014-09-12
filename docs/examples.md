@@ -190,7 +190,7 @@ new JBus.Node().listen({
 
 ## Subscription service ##
 
-Sometimes, you want for the extensions to be able to state the paramers of the messages they will receive. That's when the subscription service is called for. We will create a userscript, which will keep sending a given string back to the subscriber:
+Sometimes, you want for the extensions to be able to state the paramers of the messages they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
 
 ```js
 // ==UserScript==
