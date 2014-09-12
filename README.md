@@ -74,7 +74,9 @@ Alternatively, you can use any other minification tool or service, as long as th
 
 To be able to use jBus on your web page, input the following code in either the head or the body of the webpage. Make sure you include it before any scripts that use the library:
 
-    <script src="jBus.js"></script>
+```html
+<script src="jBus.js"></script>
+```
 
 Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
@@ -84,11 +86,13 @@ Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
 If you wish to dynamically load the latest version of jBus into your userscript, use the [`@require` metadata key][Greasemonkey @require] as follows:
 
-    // ==UserScript==
-    // ...
-    // @require http://tiny.cc/jBus
-    // ...
-    // ==/UserScript==
+```js
+// ==UserScript==
+// ...
+// @require http://tiny.cc/jBus
+// ...
+// ==/UserScript==
+```
 
   [Greasemonkey @require]: http://wiki.greasespot.net/Metadata_Block#.40require "Metadata Block - GreaseSpot Wiki"
 
