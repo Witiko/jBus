@@ -1,6 +1,6 @@
 # Userscript examples #
 
-In the following section, we will explore several development patterns that can be used, when developing userscripts with the jBus library.
+In the following section, we will explore several patterns that can be used, when developing userscripts with the jBus library.
 
 ## Beacon ##
 
