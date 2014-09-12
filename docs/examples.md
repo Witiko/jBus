@@ -70,27 +70,7 @@ We have already seen that when one of the required nodes of a node uninitializes
     var e = new JBus.Node({ name: "name.witiko.jbus.examples.sub4", requires: "name.witiko.jbus.examples.sub3" });
     var f = new JBus.Node({ name: "name.witiko.jbus.examples.sub5", requires: "name.witiko.jbus.examples.sub4" });
 
-Below is the output of a debugger node upon the execution of the above code:
-
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.root in scope #document
-    [JBus] A unicast message {Collision} to name.witiko.jbus.examples.root in scope #document
-    [JBus] A unicast message {Ping} from name.witiko.jbus.examples.sub1 to name.witiko.jbus.examples.root in scope #document
-    [JBus] A unicast message {Bonjour} from name.witiko.jbus.examples.root to name.witiko.jbus.examples.sub1 in scope #document
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.sub1 in scope #document
-    [JBus] A unicast message {Ping} from name.witiko.jbus.examples.sub2 to name.witiko.jbus.examples.root in scope #document
-    [JBus] A unicast message {Bonjour} from name.witiko.jbus.examples.root to name.witiko.jbus.examples.sub2 in scope #document
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.sub2 in scope #document
-    [JBus] A unicast message {Ping} from name.witiko.jbus.examples.sub3 to name.witiko.jbus.examples.root in scope #document
-    [JBus] A unicast message {Bonjour} from name.witiko.jbus.examples.root to name.witiko.jbus.examples.sub3 in scope #document
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.sub3 in scope #document
-    [JBus] A unicast message {Ping} from name.witiko.jbus.examples.sub4 to name.witiko.jbus.examples.sub3 in scope #document
-    [JBus] A unicast message {Bonjour} from name.witiko.jbus.examples.sub3 to name.witiko.jbus.examples.sub4 in scope #document
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.sub4 in scope #document
-    [JBus] A unicast message {Ping} from name.witiko.jbus.examples.sub5 to name.witiko.jbus.examples.sub4 in scope #document
-    [JBus] A unicast message {Bonjour} from name.witiko.jbus.examples.sub4 to name.witiko.jbus.examples.sub5 in scope #document
-    [JBus] A broadcast message {Bonjour} from name.witiko.jbus.examples.sub5 in scope #document
-
-Now suppose we destroy the root node by executing `a.destroy()`:
+Now suppose we destroy the root node by executing `a.destroy()`. Below is the output of a debugger node:
 
     [JBus] A broadcast message {Bye} from name.witiko.jbus.examples.root in scope #document
     [JBus] A broadcast message {Bye} from name.witiko.jbus.examples.sub1 in scope #document
