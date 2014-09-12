@@ -2,7 +2,7 @@
 
 ## Introduction ##
 
-In standard modern web applications, client-side scripts are either standalone, or tightly coupled with one another. Browser extensions and Greasemonkey user scripts, on the other hand, are running in a sandbox beneath an artificial `window` object and can only be loosely coupled via message-passing by sending custom DOM events, or by using [proprietary APIs][Chrome cross-extension messaging API].
+In standard modern web applications, client-side scripts are either standalone, or tightly coupled with one another. Browser extensions and Greasemonkey userscripts, on the other hand, are running in a sandbox beneath an artificial `window` object and can only be loosely coupled via message-passing by sending custom DOM events, or by using [proprietary APIs][Chrome cross-extension messaging API].
 
 The problem is that tight coupling is often undesirable, proprietary APIs are non-portable and custom events are a very crude means of communication prone to misconfiguration and event name collisions. jBus, on the other hand, is a cross-extension messaging architecture with a simple API, which enables loose coupling between any two pieces of JavaScript code sharing as little as a DOM [event target][EventTarget].
 
@@ -13,7 +13,8 @@ The problem is that tight coupling is often undesirable, proprietary APIs are no
 
   * [Architecture](docs/architecture.md)
   * [API](docs/api.md)
-  * [Use case](docs/webchat.md)
+  * [Userscript examples](docs/examples.md)
+  * [Web application example](docs/webchat.md)
 
 ## Compatibility ##
 
@@ -78,11 +79,11 @@ To be able to use jBus on your web page, input the following code in either the 
 
 Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
-### User scripts ###
+### Userscripts ###
 
 #### Dynamic loading ####
 
-If you wish to dynamically load the latest version of jBus into your user script, use the [`@require` metadata key][Greasemonkey @require] as follows:
+If you wish to dynamically load the latest version of jBus into your userscript, use the [`@require` metadata key][Greasemonkey @require] as follows:
 
     // ==UserScript==
     // ...
@@ -94,11 +95,11 @@ If you wish to dynamically load the latest version of jBus into your user script
 
 #### Static embedding ####
 
-If you wish to statically embed jBus into your user script, include the contents of the jBus build you wish to use directly into your user script. Make sure you include it before any calls to the library.
+If you wish to statically embed jBus into your userscript, include the contents of the jBus build you wish to use directly into your userscript. Make sure you include it before any calls to the library.
 
 #### Best practice ####
 
-If you prefer to dynamically load the latest version of jBus into your user script, but you want to include a static fallback, then the best practice is the following:
+If you prefer to dynamically load the latest version of jBus into your userscript, but you want to include a static fallback, then the best practice is the following:
 
   1. Use the `@require` metadata key to attempt to load the latest version of jBus into your userscript.
   2. Include the contents of the jBus build you wish to use directly into your userscript with the following modification:

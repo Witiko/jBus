@@ -1,6 +1,6 @@
-# Use case: Web chat application #
+# Example: Web chat application #
 
-In the following section, we will design a client side of a web chat to show how jBus can be used to decouple individual application components.
+In the following section, we will design a client side of a web chat application showing several jBus development patterns that can be used to decouple individual application components.
 
 ## Tight coupling ##
 
