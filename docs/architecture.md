@@ -154,4 +154,4 @@ Data are encapsulated in the `data` field of data messages and have the followin
       payload: ...
     }
 
-The `name` field contains the data identifier and the `payload` field contains the data itself. Both the `name` and `payload` fields are optional.
+The `name` field contains the data identifier and the `payload` field contains the data itself. Both the `name` and `payload` fields are optional.  When defined, the data identifier should be a fully qualified domain name to prevent collisions.
