@@ -108,11 +108,11 @@ This will allow users, whose script managers don't support the `@require` metada
 
 ## FAQ ##
 
-  1. _Isn't this essentially what [Custom Events][CustomEvent] are for?_
+  1. _Isn't this essentially what [custom events][CustomEvent] are for?_
     
-    It is. jBus is an architecture built on top of [Custom Events][CustomEvent], which allows for [scoping](docs/examples.md#scoping), [dependencies](docs/examples.md#dependencies) and [unicast messaging](docs/architecture.md#addresses). If global broadcasting of events is all you need, you can equally well use [Custom Events][CustomEvent] directly.
+    It is. jBus is an architecture built on top of [custom events][CustomEvent], which allows for [scoping](docs/examples.md#scoping), [dependencies](docs/examples.md#dependencies) and [unicast messaging](docs/architecture.md#addresses). If global broadcasting of events is all you need, you can equally well use [custom events][CustomEvent] directly.
 
-  2. _Isn't this essentially what [Storage Events][] are for?_
+  2. _Isn't this essentially what [storage events][] are for?_
     
     Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listening script will be notified about your changes, you can only store textual data, while jBus allows you to pass around any kind of data including functions.
     
