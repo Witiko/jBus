@@ -41,7 +41,7 @@ var isArray = Array.isArray || function(arr) {
  * @param iter - The given iterable.
  * @return an array copy of the given iterable.
  */
-function new$Array(iter) {
+var new$Array = Array.from || function(iter) {
   return Array.prototype.slice.call( iter, 0 );
 }
 
