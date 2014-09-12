@@ -9,4 +9,4 @@ IFS=; cat "$1" | while read -r line || [ -n "$line" ]; do
   if [ $COUNT -lt $FROM ] || [ $COUNT -gt $TO ]; then
     printf "%s\n" "$line"
   fi; COUNT=$(( $COUNT + 1 ))
-done | sed 's/return JBus;/return { Node: JBus.Node };/'
+done | sed 's/return JBus;/return { Scope: JBus.Scope, Node: JBus.Node };/'
