@@ -4,7 +4,7 @@
  * @return whether or not a value is a string.
  */
 function isString(str) {
-  return typeof str    ===    "string" ||
+  return typeof str === "string" ||
                 str instanceof String;
 };
 
@@ -23,8 +23,7 @@ function isRegExp(rexp) {
  * @return whether or not a value is a function.
  */
 function isFunction(func) {
-  return typeof func    ===    "function" ||
-                func instanceof Function;
+  return func instanceof Function;
 }
 
 /**
