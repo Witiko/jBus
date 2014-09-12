@@ -63,12 +63,14 @@ function destroy() {
 
 We have already seen that when one of the required nodes of a node uninitializes, the node itself unitializes. Imagine the initialized nodes as a directed rooted tree, where the parent nodes are required by the child nodes. Uninitializing a parent node then makes the whole subtree collapse and then reform again as soon as the parent is reinitialized. Suppose the following code:
 
-    var a = new JBus.Node( "name.witiko.jbus.examples.root" );
-    var b = new JBus.Node({ name: "name.witiko.jbus.examples.sub1", requires: "name.witiko.jbus.examples.root" });
-    var c = new JBus.Node({ name: "name.witiko.jbus.examples.sub2", requires: "name.witiko.jbus.examples.root" });
-    var d = new JBus.Node({ name: "name.witiko.jbus.examples.sub3", requires: "name.witiko.jbus.examples.root" });
-    var e = new JBus.Node({ name: "name.witiko.jbus.examples.sub4", requires: "name.witiko.jbus.examples.sub3" });
-    var f = new JBus.Node({ name: "name.witiko.jbus.examples.sub5", requires: "name.witiko.jbus.examples.sub4" });
+```js
+var a = new JBus.Node( "name.witiko.jbus.examples.root" );
+var b = new JBus.Node({ name: "name.witiko.jbus.examples.sub1", requires: "name.witiko.jbus.examples.root" });
+var c = new JBus.Node({ name: "name.witiko.jbus.examples.sub2", requires: "name.witiko.jbus.examples.root" });
+var d = new JBus.Node({ name: "name.witiko.jbus.examples.sub3", requires: "name.witiko.jbus.examples.root" });
+var e = new JBus.Node({ name: "name.witiko.jbus.examples.sub4", requires: "name.witiko.jbus.examples.sub3" });
+var f = new JBus.Node({ name: "name.witiko.jbus.examples.sub5", requires: "name.witiko.jbus.examples.sub4" });
+```
 
 Now suppose we destroy the root node by executing `a.destroy()`. Below is the output of a debugger node:
 
@@ -93,15 +95,17 @@ If we now create a new root node by running `new JBus.Node("root")`, the rest of
 
 Since a jBus network is a general graph rather than a tree, it is possible to create circular dependencies, which will never resolve. Suppose the following code:
 
-    var a = new JBus.Node({
-      name: "name.witiko.jbus.examples.a",
-      requires: "name.witiko.jbus.examples.b",
-      oninit: function() { console.log("a is initialized!") }
-    }), b = new JBus.Node({
-      name: "name.witiko.jbus.examples.b",
-      requires: "name.witiko.jbus.examples.a",
-      oninit: function() { console.log("b is initialized!") }
-    });
+```js
+var a = new JBus.Node({
+  name: "name.witiko.jbus.examples.a",
+  requires: "name.witiko.jbus.examples.b",
+  oninit: function() { console.log("a is initialized!") }
+}), b = new JBus.Node({
+  name: "name.witiko.jbus.examples.b",
+  requires: "name.witiko.jbus.examples.a",
+  oninit: function() { console.log("b is initialized!") }
+});
+```
 
 It can be be observed that upon running the above code, neither of the nodes will ever initialize. As a general rule, no set of nodes, whose dependencies can be portrayed as a directed circular graph, will ever initialize.
 
