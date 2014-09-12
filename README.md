@@ -11,8 +11,7 @@ The problem is that tight coupling is often undesirable, proprietary APIs are no
 
 ## Documentation ##
 
-  * [Architecture](docs/architecture.md)
-  * [API](docs/api.md)
+  * [Architecture](docs/architecture.md) and [API](docs/api.md)
   * [Userscript examples](docs/examples.md)
   * [Web application example](docs/webchat.md)
 
