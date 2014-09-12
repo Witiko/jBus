@@ -13,7 +13,7 @@ The problem is that tight coupling is often undesirable, proprietary APIs are no
 
   * [Architecture](docs/architecture.md) and [API](docs/api.md)
   * [Userscript examples](docs/examples.md)
-  * [Web application example](docs/webchat.md)
+  * [A web application example](docs/webchat.md)
 
 ## Compatibility ##
 
