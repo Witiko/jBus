@@ -167,7 +167,7 @@ new JBus.Node().listen({
 });
 ```
 
-This not only makes the maintenance of the separate components of the userscript easier, but it also allows any other userscript to listen for the broadcast messages and react to them without having to do as much as touch the underlying webpage:
+This not only makes the maintenance of the separate components of the userscript easier, but it also allows any other userscript to listen for incoming data on the broadcast address and react to them without having to do as much as touch the underlying webpage:
 
 ```js
 // ==UserScript==
@@ -187,6 +187,40 @@ new JBus.Node().listen({
 
   [CustomEvent]: http://www.w3.org/TR/DOM-Level-3-Events/#interface-CustomEvent "DOM 3 Events Specification"
   [DOM 2 Mutation events]: http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-mutationevents "Document Object Model Events"
+
+### Scoping ###
+
+If you don't want to broadcast the data globally, but only within your userscript, it is advisable to use an anonymous private scope to prevent the cluttering up of the default public scope like this:
+
+```js
+// ==UserScript==
+// @name           An example userscript #3
+// @description    A broadcast service
+// @match          *://github.com/witiko/jbus
+// @require        http://tiny.cc/jBus
+// ==/UserScript==
+
+var scope = new JBus.Scope,
+    node = new JBus.Node({
+  name: "name.witiko.jbus.examples.userscript#3",
+  scope: scope
+});
+
+document.querySelector(/* ... */).addEventListener("DOMSubtreeModified", function(e) {
+  // We process the event
+  node.send({
+    data: // The processed event
+  });
+}, false);
+
+new JBus.Node({ scope: scope }).listen({
+  broadcast: function(msg) {
+    // We react to `msg.data.payload`
+  }, filters: {
+    from: "name.witiko.jbus.examples.userscript#3"
+  }
+});
+```
 
 ## Subscription service ##
 
