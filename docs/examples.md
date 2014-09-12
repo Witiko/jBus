@@ -1,4 +1,4 @@
-# Userscript examples #
+# Example userscripts #
 
 In the following section, we will explore several patterns that can be used, when developing userscripts with the jBus library.
 
