@@ -259,7 +259,7 @@ var node = new JBus.Node({
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
 
-var node = new JBus.Node({
+new JBus.Node({
   requires: "name.witiko.jbus.examples.userscript#5",
   oninit: function() {
     this.send({
