@@ -82,7 +82,7 @@ The `from` field contains the sender's name.
 
 ### Data message ###
 
-The data messages are sent at application's leisure and have the following format:
+Data messages are sent at application's leisure and have the following format:
 
     {
       type: 0x04,
