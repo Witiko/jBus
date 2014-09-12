@@ -57,7 +57,9 @@ function destroy() {
 }
 ```
 
-### Cascading dependencies ###
+### Dependencies ###
+
+#### Cascading dependencies ####
 
 We have already seen that when one of the required nodes of a node uninitializes, the node itself unitializes. Imagine the initialized nodes as a directed rooted tree, where the parent nodes are required by the child nodes. Uninitializing a parent node then makes the whole subtree collapse and then reform again as soon as the parent is reinitialized. Suppose the following code:
 

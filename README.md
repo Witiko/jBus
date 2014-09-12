@@ -107,6 +107,20 @@ If you prefer to dynamically load the latest version of jBus into your userscrip
 
 This will allow users, whose script managers don't support the `@require` metadata key, to fall back on the statically embedded jBus library.
 
+## FAQ ##
+
+  1. _Isn't this essentially what [Custom Events][CustomEvent] are for?_
+    
+    It is. jBus is an architecture built on top of [Custom Events][CustomEvent], which allows for [scoping](docs/examples.md#scoping), [dependencies](docs/examples.md#dependencies) and [unicast messaging](docs/architecture.md#addresses). If global broadcasting of events is all you need, you can equally well use [Custom Events][CustomEvent] directly.
+
+  2. _Isn't this essentially what [Storage Events][] are for?_
+    
+    Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listening script will be notified about your changes, you can only store textual data, while jBus allows you to pass around any kind of data including functions. Not to mention that the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects are designed to store, rather than post data. Last, but not least, jBus allows you to [scope](docs/examples.md#scoping) your messages, while there can only be one, global instance of the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects, and you can build chains of [dependencies](docs/examples.md#dependencies) between individual jBus nodes.
+
+[localStorage]: http://www.w3.org/TR/webstorage/#the-localstorage-attribute "Web Storage"
+[sessionStorage]: http://www.w3.org/TR/webstorage/#the-sessionstorage-attribute "Web Storage"
+[Storage Events]: http://www.w3.org/TR/webstorage/#the-storage-event "Web Storage"
+
 ## License (MIT) ##
 
 Copyright (c) 2014 Vít Novotný
