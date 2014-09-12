@@ -205,16 +205,16 @@ var node = new JBus.Node({
   autoinit: false
 }); node.listen({
   unicast: function(msg) {
-    // An incoming subscription, we create a
-    // personalised subscription sender node
+    /* An incoming subscription. We create a
+       personalised subscription sender node. */
     var subscriber = msg.from,
         string = msg.data.payload,
         interval, sender = new JBus.Node({
       requires: subscriber,
       oninit: function() {
         interval = setInterval(function() {
-          // We will keep sending the given string
-          // back to the subscriber every 5 seconds.
+          /* We will keep sending the given string
+             back to the subscriber every 5 seconds. */
           sender.send({
             to: subscriber,
             data: string
