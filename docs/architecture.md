@@ -21,7 +21,9 @@ The node addressing scheme differentiates between two types of addresses:
   1. *Broadcast* -- Events sent to this address are retrieved by all nodes, which are initializing or initialized.
   2. *Unicast* -- Events sent to these addresses are retrieved by the addressed node, if it's initializing or initialized.
 
-The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope. Unicast addresses are of the form `jBus::unicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the receiving node (hereinafter, recipient). Hereinafter, *sending a message to an address* means dispatching a custom event named as the address and containing the message object. Hereinafter, *listening for messages on an address* means adding an event listener to an event named as the address.
+The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope. Unicast addresses are of the form `jBus::unicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the receiving node (hereinafter, recipient).
+
+Hereinafter, *sending a message to an address* means dispatching a custom event named as the address and containing the message object. Hereinafter, *listening for messages on an address* means adding an event listener to an event named as the address.
 
 ## Messages ##
 
