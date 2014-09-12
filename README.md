@@ -70,16 +70,6 @@ Alternatively, you can use any other minification tool or service, as long as th
 
 ## Installation ##
 
-### Web pages ###
-
-To be able to use jBus on your web page, input the following code in either the head or the body of the webpage. Make sure you include it before any scripts that use the library:
-
-```html
-<script src="jBus.js"></script>
-```
-
-Replace `jBus.js` with a pathname to the jBus build you wish to use.
-
 ### Userscripts ###
 
 #### Dynamic loading ####
@@ -109,6 +99,16 @@ If you prefer to dynamically load the latest version of jBus into your userscrip
     * Replace the initial `var JBus = ` with `var JBus; if(!JBus) JBus = `.
 
 This will allow users, whose script managers don't support the `@require` metadata key, to fall back on the statically embedded jBus library.
+
+### Web pages ###
+
+To be able to use jBus on your web page, input the following code in either the head or the body of the webpage. Make sure you include it before any scripts that use the library:
+
+```html
+<script src="jBus.js"></script>
+```
+
+Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
 ## FAQ ##
 
