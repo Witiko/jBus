@@ -4,7 +4,7 @@
 
 The physical layer of a jBus network is based on the [`CustomEvent`][CustomEvent] interface, as described in the [DOM 3 Events W3C working draft][DOM 3 Events], which allows the creation of synthetic events via the [`createEvent()`][DocumentEvent.createEvent] method, as described in the [DOM 2 Events W3C recommendation][DOM 2 Events]. These events are then initialized as non-bubbling and non-cancellable and dispatched using the [`dispatchEvent()`][EventTarget.dispatchEvent] method, as described in the [DOM 2 Events W3C recommendation][DOM 2 Events].
 
-This effectively enables transfer of arbitrary data through an unlimited number of separate channels as represented by both the event name and the [event target][EventTarget]. Event names are used as addresses and [event targets][EventTarget] (hereinafter, scopes) represent separate jBus networks (hereinafter, networks). Every jBus node (hereinafter just node) can be assigned to multiple scopes and thus connected to multiple networks. The default scope is the public `window.document` object as described in the [WHATWG HTML specification][Window interface specification].
+This effectively enables transfer of arbitrary data through an unlimited number of separate channels as represented by both the event name and the [event target][EventTarget]. Event names are used as addresses and [event targets][EventTarget] (hereinafter, scopes) represent separate jBus networks. Every jBus node (hereinafter just node) can be assigned to multiple scopes and thus connected to multiple networks. The default scope is the public `window.document` object as described in the [WHATWG HTML specification][Window interface specification].
 
   [DOM 2 Events]: http://www.w3.org/TR/DOM-Level-2-Events/ "DOM 2 Events Specification"
   [DOM 3 Events]: http://www.w3.org/TR/DOM-Level-3-Events/ "DOM 3 Events Specification"
@@ -27,7 +27,7 @@ Hereinafter, *sending a message to an address* means dispatching a custom event 
 
 ## Messages ##
 
-The network protocol describes the following types of messages:
+jBus uses the following types of messages:
 
   1. *Collision* -- Informs the receiving node of a name collision.
   2. *Bonjour* -- Informs the receiving node of the sending node's (hereinafter, sender's) existence.
