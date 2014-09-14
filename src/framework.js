@@ -76,8 +76,9 @@ var $Array = {
       }
     : function(arr, callback) {
       for(var i = 0; i < arr.length; i++) {
-        if( arr[i] !== undefined )
+        if( i in arr ) {
           callback( arr[i], i, arr );
+        }
       }
     },
   
@@ -106,7 +107,7 @@ var $Array = {
       }
     : function(arr, callback) {
       for(var i = 0; i < arr.length; i++) {
-        if( arr[i] !== undefined ) {
+        if( i in arr ) {
           if( callback( arr[i], i, arr ) ) {
             return true;
           }
@@ -130,7 +131,7 @@ var $Array = {
       }
     : function(arr, val) {
       for(var i = 0; i < arr.length; i++) {
-        if( arr[i] == val ) {
+        if( arr[i] === val ) {
           return i;
         }
       } return -1;
