@@ -36,7 +36,7 @@ new JBus.Node({
 });
 ```
 
-That means that you can initialize and destroy the beacon node at will and the dependent userscripts will notice right away:
+The beacon node can be destroyed and initialized at will and the dependent userscripts will notice right away:
 
 ```js
 // ==UserScript==
@@ -48,10 +48,16 @@ That means that you can initialize and destroy the beacon node at will and the d
 
 var node;
 
+/**
+ * Initializes the beacon node.
+ */
 function init() {
   node = new JBus.Node( "name.witiko.jbus.examples.userscript#1" );
 }
 
+/**
+ * Destroys the beacon node.
+ */
 function destroy() {
   node.destroy();
 }
