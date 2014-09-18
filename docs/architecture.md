@@ -19,9 +19,11 @@ This effectively enables transfer of arbitrary data through an unlimited number 
 The node addressing scheme differentiates between two types of addresses:
 
   1. *Broadcast* -- Events sent to this address are retrieved by all nodes, which are initializing or initialized.
-  2. *Unicast* -- Events sent to these addresses are retrieved by the addressed node, if it's initializing or initialized.
-
-The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope. Unicast addresses are of the form `jBus::unicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the receiving node (hereinafter, recipient).
+    * The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope.
+  2. *Multicast* -- Events sent to this address are retrieved by all subscribed nodes, which are initializing or initialized.
+    * Multicast addresses are of the form `jBus::multicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the subscribed set of notes (hereinafter, group).
+  3. *Unicast* -- Events sent to these addresses are retrieved by the addressed node, if it's initializing or initialized.
+    * Unicast addresses are of the form `jBus::unicast::<name>`, where `<name>` is a name of the receiving node (hereinafter, recipient).
 
 Hereinafter, *sending a message to an address* means dispatching a custom event named as the address and containing the message object. Hereinafter, *listening for messages on an address* means adding an event listener to an event named as the address.
 
@@ -96,13 +98,17 @@ The `from` field contains the sender's name. The `data` field contains applicati
 
 A node has several properties:
 
-  1. *Name* -- A unique textual identifier used for addressing
+  1. *Name* -- A name used for unicast addressing
     * The name should be a fully qualified domain name to prevent collisions.
+    * The rule above can be relaxed for nodes, which only operate in anonymous private scopes.
   1. *Description* -- A short textual description of the node (optional)
   2. *Dependencies* -- A set containing names of required nodes
     * The node can only be initialized when all the required nodes are initialized.
   3. *Scopes* -- A set of scopes in which the node operates
-  4. *State* -- The state of the node; must be one of the following:
+  4. *Groups* -- A set of groups, on whose multicast addresses the node is listening.
+    * The group names should be fully qualified domain names to prevent collisions.
+    * The rule above can be relaxed for nodes, which only operate in anonymous private scopes.
+  5. *State* -- The state of the node; must be one of the following:
     1. *Uninitialized* -- The node has been created, but may neither listen for messages on any address nor send any messages.
     2. *Initializing* -- The node is waiting for all required nodes to be initialized.
     3. *Initialized* -- The node is ready to send and receive application data.
@@ -114,7 +120,10 @@ A node has several properties:
   2. The uninitialized node then, either automatically or on an application's request:
     1. Switches to the initializing state.
     2. Sends a collision message to its own unicast address in all its scopes.
-    3. Starts listening for messages on both the broadcast address and its unicast address in all its scopes.
+    3. Starts listening for messages on:
+        1. The broadcast address in all its scopes.
+        2. The multicast addresses of all its groups in all its scopes.
+        3. Its own unicast address in all its scopes.
     4. If the node has any dependencies, it:
         1. Sends ping message to the unicast addresses of all the required nodes in all its scopes.
         2. Waits until it has received a bonjour message from all the required nodes in any of its scopes.
@@ -134,7 +143,7 @@ A node has several properties:
     1. Sends a bye message to the broadcast address in all its scopes.
     2. Switches to the uninitialized state for the purpose of notifying the application.
     3. Switches to the destroyed state.
-    4. Stops listening for messages on both the broadcast address and its unicast address in all its scopes.
+    4. Stops listening for any messages in all its scopes.
   8. When the initializing or initialized node has received a collision message in any scope, the node:
     1. Behaves as if it were destroyed by the application except for sending a bye message.
 
@@ -156,4 +165,4 @@ Data are encapsulated in the `data` field of data messages and have the followin
       payload: ...
     }
 
-The `name` field contains the data identifier and the `payload` field contains the data itself. Both the `name` and `payload` fields are optional.  When defined, the data identifier should be a fully qualified domain name to prevent collisions.
+The `name` field contains the name of the data and the `payload` field contains the data itself. Both the `name` and `payload` fields are optional. When defined, the name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes.

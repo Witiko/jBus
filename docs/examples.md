@@ -216,6 +216,50 @@ new JBus.Node({ scope: scope }).listen({
 });
 ```
 
+### Multicasting ###
+
+Multicasting is useful, when you only want to broadcast data to a specific group of listeners:
+
+```js
+// ==UserScript==
+// @name           An example userscript #3
+// @description    A broadcast service
+// @match          *://github.com/witiko/jbus
+// @require        http://tiny.cc/jBus
+// ==/UserScript==
+
+var node = new JBus.Node("name.witiko.jbus.examples.userscript#3");
+
+document.querySelector(/* ... */).addEventListener("DOMSubtreeModified", function(e) {
+  // We process the event
+  node.send({
+    to: {
+      group: "name.witiko.jbus.examples.group#1"
+    }, data: // The processed event
+  });
+}, false);
+```
+
+```js
+// ==UserScript==
+// @name           An example userscript #4
+// @match          *://github.com/witiko/jbus
+// @require        http://tiny.cc/jBus
+// ==/UserScript==
+
+new JBus.Node({
+  group: "name.witiko.jbus.examples.group#1"
+}).listen({
+  broadcast: function(msg) {
+    // We react to `msg.data.payload`
+  }, filters: {
+    from: "name.witiko.jbus.examples.userscript#3"
+  }
+});
+```
+
+Multicasting is generally preferred over broadcasting, unless we're operating in an anonymous private scope, where every node is guaranteed to be interested in the broadcasted data.
+
 ## Subscription service ##
 
 Sometimes, you want for the userscripts to be able to state the paramers of the data they will receive. That's when the subscription service comes in handy. We will create a userscript, which will keep sending a given string back to the subscriber:
@@ -287,6 +331,65 @@ Below is the output of the userscript #6:
     [ Fri Sep 12 2014 15:06:38 GMT+0200 (CEST) ] Hello world!
     [ Fri Sep 12 2014 15:06:43 GMT+0200 (CEST) ] Hello world!
     [ Fri Sep 12 2014 15:06:48 GMT+0200 (CEST) ] Hello world!
+
+### Message naming ###
+
+Sometimes it makes sense for a node to send several types of data:
+
+```js
+// ==UserScript==
+// @name           An example userscript #7
+// @description    A beacon
+// @match          *://github.com/witiko/jbus
+// @require        http://tiny.cc/jBus
+// ==/UserScript==
+
+var node = new JBus.Node({
+  name: "name.witiko.jbus.examples.userscript#7",
+  autoinit: false
+}); node.listen({
+  unicast: function(msg) {
+    switch( msg.data.name ) {
+      case "name.witiko.jbus.examples.messages.greeting":
+        console.log("I received a greeting message:", msg.data.payload); break;
+      case "name.witiko.jbus.examples.messages.farewell":
+        console.log("I received a farewell message:", msg.data.payload); break;
+    }
+  }
+}); node.init();
+```
+
+```js
+// ==UserScript==
+// @name           An example userscript #8
+// @match          *://github.com/witiko/jbus
+// @require        http://tiny.cc/jBus
+// ==/UserScript==
+
+new JBus.Node({
+  requires: "name.witiko.jbus.examples.userscript#7",
+  oninit: function() {
+    this.send({
+      to: "name.witiko.jbus.examples.userscript#7",
+      data: {
+        name: "name.witiko.jbus.examples.messages.greeting",
+        payload: "Hey there!"
+      }
+    }); this.send({
+      to: "name.witiko.jbus.examples.userscript#7",
+      data: {
+        name: "name.witiko.jbus.examples.messages.farewell",
+        payload: "Goodbye!"
+      }
+    });
+  }
+});
+```
+
+Below is the output of the userscript #7:
+
+    I received a greeting message: Hey there!
+    I received a farewell message: Goodbye!
 
 ## Sky is the limit ##
 

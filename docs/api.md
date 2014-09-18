@@ -17,13 +17,14 @@ The `JBus.Node` method acts as a constructor of a node. Below is the most extens
       onuninit: ... ,
       ondestroy: ... ,
       scope: ... ,
+      group: ... ,
       requires: ... ,
       autoinit: ... ,
     });
 
 ### Attribute `name` ###
 
-The `name` attribute may contain a reference to a string representing the name of the node. The name should be a fully qualified domain name to prevent collisions. If the `name` attribute is undefined, a name `name.witiko.jbus.anonymous@` followed by a pseudo-random hash obtained by executing `Math.random().toString(36).replace(/0\./, "")` will be used instead.
+The `name` attribute may contain a reference to a string representing the name of the node. The name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes. If the `name` attribute is undefined, a name `name.witiko.jbus.anonymous@` followed by a pseudo-random hash obtained by executing `Math.random().toString(36).replace(/0\./, "")` will be used instead.
 
 ### Attribute `description` ###
 
@@ -44,6 +45,10 @@ The `ondestroy` attribute may contain a reference to a function, which will be c
 ### Attribute `scope` ###
 
 The `scope` attribute may contain a reference to either a scope or an array of scopes. If the `scope` attribute is undefined, the `window.document` object will be used as the node's default scope.
+
+### Attribute `group` ###
+
+The `group` attribute may contain a reference to either a string or to an array of strings representing the name(s) of the group(s), on whose multicast address(es) the node is going to be listening. Each name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes.
 
 ### Attribute `requires` ###
 
@@ -84,10 +89,13 @@ Once called, the `new JBus.Node().destroy` method will destroy the non-destroyed
 
 ## Method `new JBus.Node().send` ##
 
-Once called, the `new JBus.Node().send` method will send a data message with the specified identifier and payload to either the broadcast address or the unicast addresses of the specified nodes. Below is the most extensive way of calling the method:
+Once called, the `new JBus.Node().send` method will send a data message with the specified name and payload to either the broadcast address or the unicast addresses of the specified nodes. Below is the most extensive way of calling the method:
 
     new JBus.Node().send({
-      to: ... ,
+      to: {
+        node: ... ,
+        group: ...
+      },
       data: {
         name: ... ,
         payload: ...
@@ -96,13 +104,21 @@ Once called, the `new JBus.Node().send` method will send a data message with the
 
 The method has no return value.
 
-### Attribute `to` ###
+### Attribute `to`
 
-The `to` attribute may contain a reference to either a string representing the name of the recipient or an array of strings representing the name of the recipient. If the `to` attribute is undefined, the message will be sent to the broadcast address.
+If the `to` attribute is undefined, or `typeof to !== "string"` and `to` contains neither the `node` nor the `group` attribute, the message will be sent to the broadcast address.
+
+### Attribute `to.node` ###
+
+The `to.node` attribute may contain a reference to either a string or to an array of strings representing the name(s) of the recipient(s).
+
+### Attribute `to.group` ###
+
+The `to.group` attribute may contain a reference to either a string or to an array of strings representing the name(s) of the receiving group(s).
 
 ### Attribute `data.name` ###
 
-The `data.name` attribute may contain the data identifier. The identifier should be a fully qualified domain name to prevent collisions.
+The `data.name` attribute may contain the name of the data. The name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes.
 
 ### Attribute `data.payload` ###
 
@@ -134,6 +150,15 @@ The `new JBus.Node().send` method supports the following shorthand overloads:
             payload: payload
           }
         });
+  
+  * `new JBus.Node().send({ ... , to: node })`, where `typeof node === "string"` or `node` is an array is equal to calling:
+    
+        new JBus.Node().send({
+          ...
+          to: {
+            node: node
+          }
+        });
 
 ## Method `new JBus.Node().listen` ##
 
@@ -141,6 +166,7 @@ Once called, the `new JBus.Node().listen` method will add listeners for incoming
 
     new JBus.Node().listen({
       broadcast: ... ,
+      multicast: ... ,
       unicast: ... ,
       any: ... ,
       filters: {
@@ -152,17 +178,20 @@ Once called, the `new JBus.Node().listen` method will add listeners for incoming
 
 The method returns a function, which will remove the registered listeners.
 
-### Attributes `broadcast`, `unicast` and `any` ###
+### Attributes `broadcast`, `multicast`, `unicast` and `any` ###
 
-The `broadcast` and `unicast` attributes may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address or the node's unicast address, respectively. The `any` attribute may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address or the node's unicast address. The functions will be called with one argument of the following form:
+The `broadcast`, `multicast` and `unicast` attributes may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address, one of the node's groups' multicast address, or the node's unicast address, respectively.
+
+The `any` attribute may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address, one of the node's groups' multicast address, or the node's unicast address. The functions will be called with one argument of the following form:
 
     {
       from: ... ,
+      to:   ... ,
       data: ... ,
       scope: ...
     }
 
-The `from` attribute will contain the name of the sender, the `data` attribute will contain the data part of the incoming message and the `scope` attribute will contain the scope in which the message was received.
+The `from` attribute will contain the name of the sender, the `data` attribute will contain the data part of the incoming message and the `scope` attribute will contain the scope in which the message was received. The `to` attribute will contain the name of the receiver group, when the message is received on the multicast address.
 
 ### Attributes `filters.from`, `filters.name` and `filters.payload` ###
 
@@ -198,6 +227,7 @@ The `JBus.Debugger` method acts as a constructor of a debugger node. A debugger 
       onuninit: ... ,
       ondestroy: ... ,
       scope: ... ,
+      group: ... ,
       requires: ... ,
       autoinit: ... ,
       autolog: ...
@@ -218,6 +248,10 @@ The `ondestroy` attribute may contain a reference to a function, which will be c
 ### Attribute `scope` ###
 
 The `scope` attribute may contain a reference to either a scope or an array of scopes. If the `scope` attribute is undefined, the `window.document` object will be used as the node's default scope.
+
+### Attribute `group` ###
+
+The `group` attribute may contain a reference to either a string or to an array of strings representing the name(s) of the group(s), on whose multicast address(es) the node is going to be listening. Each name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes.
 
 ### Attribute `requires` ###
 
@@ -268,9 +302,17 @@ Once called, the `new JBus.Debugger().send` method will send the specified messa
 
 The method has no return value.
 
-### Attribute `to` ###
+### Attribute `to`
 
-The `to` attribute may contain a reference to either a string representing the name of the recipient or an array of strings representing the name of the recipient. If the `to` attribute is undefined, the message will be sent to the broadcast address.
+If the `to` attribute is undefined, or `typeof to !== "string"` and `to` contains neither the `node` nor the `group` attribute, the message will be sent to the broadcast address.
+
+### Attribute `to.node` ###
+
+The `to.node` attribute may contain a reference to either a string representing or to an array of strings representing the name(s) of the recipient(s).
+
+### Attribute `to.group` ###
+
+The `to.group` attribute may contain a reference to either a string or to an array of strings representing the name(s) of the receiving group(s).
 
 ### Attribute `msg` ###
 
@@ -280,7 +322,16 @@ The `msg` attribute must contain the outgoing message. If the outgoing message o
 
 The `new JBus.Debugger().send` method supports the following shorthand overloads:
 
-  * `new JBus.Debugger().send(msg)`, where `typeof data !== "object"` or `msg` doesn't contain the `msg` attribute, is equal to calling `new JBus.Debugger().send({ msg: msg })`.
+  * `new JBus.Debugger().send(msg)`, where `typeof msg !== "object"` or `msg` doesn't contain the `msg` attribute, is equal to calling `new JBus.Debugger().send({ msg: msg })`.
+  * `new JBus.Debugger().send({ ... , to: node })`, where `typeof node === "string"` or `node` is an array is equal to calling:
+    
+        new JBus.Node().send({
+          ...
+          to: {
+            node: node
+          }
+        });
+
 
 ## Method `new JBus.Debugger().listen` ##
 
@@ -288,15 +339,18 @@ Once called, the `new JBus.Debugger().listen` method will add listeners for inco
 
     new JBus.Debugger().listen({
       broadcast: ... ,
+      multicast: ... ,
       unicast: ... ,
       any: ...
     });
 
 The method returns a function, which will remove the registered listeners.
 
-### Attributes `broadcast`, `unicast` and `any` ###
+### Attributes `broadcast`, `multicast` `unicast` and `any` ###
 
-The `broadcast` and `unicast` attributes may contain a reference to a function, which will be called in the context of the node once a message has been received on either the broadcast address or any of the unicast addresses of the present nodes, respectively. The `any` attribute may contain a reference to a function, which will be called in the context of the node once a message has been received on either the broadcast address or any of the unicast addresses of the present nodes. The functions will be called with one argument of the following form:
+The `broadcast`, `multicast` and `unicast` attributes may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address, one of the node's groups' multicast address, or the node's unicast address, respectively.
+
+The `any` attribute may contain a reference to a function, which will be called in the context of the node once a data message has been received on either the broadcast address, one of the node's groups' multicast address, or the node's unicast address. The functions will be called with one argument of the following form:
 
     {
       to: ... ,
@@ -304,7 +358,7 @@ The `broadcast` and `unicast` attributes may contain a reference to a function, 
       scope: ...
     }
 
-The `to` attribute may contain the name of the received. If the `to` attribute is undefined, the message was received on the broadcast address. The `msg` attribute will contain the incoming message and the `scope` attribute will contain the scope in which the message was received.
+The `to` attribute may contain the name of the receiver node or group based on whether the message was received on the unicast or the multicast address, respectively. If the `to` attribute is undefined, the message was received on the broadcast address. The `msg` attribute will contain the incoming message and the `scope` attribute will contain the scope in which the message was received.
 
 ### Overloads ###
 
@@ -340,6 +394,14 @@ The `JBus.services.messages.broadcast.send` method is used by the `JBus.Node` an
 
 The `scope` parameter is the scope in which the message is going to be sent and the `msg` parameter is the message being sent. The method has no return value.
 
+## Method `JBus.services.messages.multicast.send` ##
+
+The `JBus.services.messages.multicast.send` method is used by the `JBus.Node` and `JBus.Debugger` objects to send messages to the multicast address of the given group in the given scope. Below is the most extensive way of calling the function:
+
+    JBus.services.messages.multicast.send( scope, name, msg )
+
+The `scope` parameter is the scope in which the message is going to be sent, the `name` parameter is the name of the receiving group and the `msg` parameter is the message being sent. The method has no return value.
+
 ## Method `JBus.services.messages.unicast.send` ##
 
 The `JBus.services.messages.unicast.send` method is used by the `JBus.Node` and `JBus.Debugger` objects to send messages to the unicast address of the given node in the given scope. Below is the most extensive way of calling the function:
@@ -356,13 +418,21 @@ The `JBus.services.messages.broadcast.listen` method is used by the `JBus.Node` 
 
 The `scope` parameter is the scope to which the listener is going to be added and the `callback` parameter is a reference to a function, which will be called each time a message is received on the broadcast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
 
+## Method `JBus.services.messages.multicast.listen` ##
+
+The `JBus.services.messages.unicast.listen` method is used by the `JBus.Node` and `JBus.Debugger` objects to listen for incoming messages on the multicast address of the given group in the given scope. Below is the most extensive way of calling the function:
+
+    JBus.services.messages.multicast.listen( scope, name, callback )
+
+The `scope` parameter is the scope to which the listener is going to be added, the `name` parameter is a reference to a string containing the name of the group, on whose multicast address the listener is going to be listening, and the `callback` parameter is a reference to a function, which will be called each time a message is received on the multicast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
+
 ## Method `JBus.services.messages.unicast.listen` ##
 
 The `JBus.services.messages.unicast.listen` method is used by the `JBus.Node` and `JBus.Debugger` objects to listen for incoming messages on the unicast address of the given node in the given scope. Below is the most extensive way of calling the function:
 
     JBus.services.messages.unicast.listen( scope, name, callback )
 
-The `scope` parameter is the scope to which the listener is going to be added, the `name` parameter is a reference to a string containing the name of the node, on whose unicast address the listener is going to be listening, and the `callback` parameter is a reference to a function, which will be called each time a message is received on the broadcast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
+The `scope` parameter is the scope to which the listener is going to be added, the `name` parameter is a reference to a string containing the name of the node, on whose unicast address the listener is going to be listening, and the `callback` parameter is a reference to a function, which will be called each time a message is received on the unicast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
 
 ## Object `JBus.messages.Collision` ##
 
@@ -455,7 +525,7 @@ The `from` attribute is a reference to a string containing the name of the sende
 
 ### Attribute `name` ###
 
-The `name` attribute may be a reference to a string containing the identifier of the data in the message. The identifier should be a fully qualified domain name to prevent collisions.
+The `name` attribute may be a reference to a string containing the name of the data in the message. The name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes.
 
 ### Attribute `payload` ###
 
