@@ -332,7 +332,7 @@ Below is the output of the userscript #6:
     [ Fri Sep 12 2014 15:06:43 GMT+0200 (CEST) ] Hello world!
     [ Fri Sep 12 2014 15:06:48 GMT+0200 (CEST) ] Hello world!
 
-### Message naming ###
+### Data naming ###
 
 Sometimes it makes sense for a node to send several types of data:
 
@@ -393,4 +393,4 @@ Below is the output of the userscript #7:
 
 ## Sky is the limit ##
 
-The patterns above were just a taste of what you can do with jBus. The architecture is general and allows you to implement any client-server or peer-to-peer bindings between your userscript components or individual userscripts.
+The examples and patterns above were a mere taste of what you can do with jBus to whet your appetite. The architecture is general and allows you to implement any client-server or peer-to-peer bindings between your userscript components or individual userscripts.
