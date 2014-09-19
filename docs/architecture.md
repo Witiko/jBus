@@ -16,7 +16,7 @@ This effectively enables transfer of arbitrary data through an unlimited number 
 
 ## Addresses ##
 
-The node addressing scheme differentiates between two types of addresses:
+The node addressing scheme differentiates between three types of addresses:
 
   1. *Broadcast* -- Events sent to this address are retrieved by all nodes, which are initializing or initialized.
     * The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope.
