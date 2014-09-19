@@ -331,4 +331,4 @@ The proposed solution is overengineered for the majority of practical purposes, 
   [1.svg]: ../images/1.svg
   [2.svg]: ../images/2.svg
   [3.svg]: ../images/3.svg
-  [4.svg]: ../images/3.svg
+  [4.svg]: ../images/4.svg
