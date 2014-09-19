@@ -996,7 +996,7 @@ var JBus = (function() {
               return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.BROADCAST, function(msg) {
                 callback(msg);
               });
-            },
+            }
           
         }, multicast: {
          
