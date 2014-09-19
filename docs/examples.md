@@ -250,7 +250,7 @@ document.querySelector(/* ... */).addEventListener("DOMSubtreeModified", functio
 new JBus.Node({
   group: "name.witiko.jbus.examples.group#1"
 }).listen({
-  broadcast: function(msg) {
+  multicast: function(msg) {
     // We react to `msg.data.payload`
   }, filters: {
     from: "name.witiko.jbus.examples.userscript#3"
@@ -351,9 +351,9 @@ var node = new JBus.Node({
   unicast: function(msg) {
     switch( msg.data.name ) {
       case "name.witiko.jbus.examples.messages.greeting":
-        console.log("I received a greeting message:", msg.data.payload); break;
+        console.log( "I received a greeting message:", msg.data.payload ); break;
       case "name.witiko.jbus.examples.messages.farewell":
-        console.log("I received a farewell message:", msg.data.payload); break;
+        console.log( "I received a farewell message:", msg.data.payload ); break;
     }
   }
 }); node.init();
