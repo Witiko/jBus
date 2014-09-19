@@ -3282,16 +3282,16 @@ var tests = {
 };
 
 /**
- * Returns a random group name
- * @return a random group name
+ * Returns a random group name.
+ * @return a random group name.
  */
 function getRandomGroupName() {
   return "name.witiko.jbus.testsuite.group@" + $String.random();
 }
 
 /**
- * Returns a random name
- * @return a random name
+ * Returns a random name.
+ * @return a random name.
  */
 function getRandomName() {
   return "name.witiko.jbus.testsuite.name@" + $String.random();
