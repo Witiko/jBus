@@ -3,10 +3,12 @@ var JBus = (function() {
   // # Constants #
   var STRINGS = {
     LOGGER: "[JBus]",
+    WARNING: "Warning:",
     DEBUGGER: "A JBus debugger"
   }, PREFIXES = {
     JBUS: "jBus",
     BROADCAST: "broadcast",
+    MULTICAST: "multicast",
     UNICAST: "unicast",
     ANONYMOUS: "name.witiko.jbus.anonymous",
     DEBUGGER: "name.witiko.jbus.debugger"
@@ -85,7 +87,30 @@ var JBus = (function() {
           scopes = [ options.scope ];
         } else {
           scopes = [ JBus.Scope() ];
-        } this.scopes = scopes;
+        }
+                
+        // We check, whether the node's name is a fully qualified domain name.
+        if( !isQualified( name ) && $Array.contains( scopes, JBus.Scope() ) ) {
+          warn("A node", name, "without a fully qualified domain name has been created in the default scope.");
+        }
+        
+        // This array stores all groups to which we are subscribed
+        var groups;
+        if( isArray( options.group ) ) {
+          groups = options.group;
+        } else if( isString( options.group ) ) {
+          groups = [ options.group ];
+        } else {
+          groups = [ ];
+        } groups = $Array.filter( groups, isString );
+        
+        // We check, whether the groups' names are fully qualified domain names.
+        if( $Array.contains( scopes, JBus.Scope() ) ) $Array.forEach( groups, function(group) {
+          if( !isQualified( group ) ) {
+            warn("A node", name, "in the default scope is listening on the " +
+              "multicast address of a group", group, "without a fully qualified domain name.");
+          }
+        });
 
         // This array stores all required JBus nodes.
         var required;
@@ -199,14 +224,16 @@ var JBus = (function() {
             JBus.services.messages.unicast.send(scope, name, new JBus.messages.Collision );
           });
 
-          // Next, we start listening for broadcast and unicast control messages.
+          // Next, we start listening for broadcast, multicast and unicast control messages.
           $Array.forEach(scopes, function(scope) {
 
             // We store the subscription-cancelling functions.
             listeners.push(
               JBus.services.messages.broadcast.listen( scope, listener ),
               JBus.services.messages.unicast.listen( scope, name, listener )
-            );
+            ); $Array.forEach(groups, function(group) {
+              listeners.push( JBus.services.messages.multicast.listen( scope, group, listener ) );
+            });
 
             function listener(msg) {
               switch(msg.type) {
@@ -331,26 +358,26 @@ var JBus = (function() {
 
           // Overloading support
           if( typeof options !== "object" || ( !("data" in options) && !("to" in options) ) ) {
-            return this.send({
+            options = {
               data: options
-            });
+            };
           }
         
-          if( !("data" in options) && "to" in options ) {
-            return this.send({
-              to: options.to,
-              data: null
-            });
+          if( !("data" in options) ) {
+            options.data = null;
           }
 
           if( typeof options.data !== "object" || !options.data || !("name" in options.data)) {
-            return this.send({
-              to: options.to,
-              data: {
-                name: null,
-                payload: options.data
-              }
-            });
+            options.data = {
+              name: null,
+              payload: options.data
+            };
+          }
+          
+          if( isString( options.to ) ) {
+            options.to = {
+              node: options.to
+            };
           }
 
           // We construct the message.
@@ -360,13 +387,23 @@ var JBus = (function() {
             payload: options.data.payload
           });
 
-          // If there is a "to" field, we send unicast user messages.
-          if(options.to) {
-            $Array.forEach(isArray( options.to ) ? options.to : [ options.to ], function(to) {
-              $Array.forEach(scopes, function(scope) {
-                JBus.services.messages.unicast.send( scope, to, msg );
+          // If there is a `to` field, we send unicast / multicast user messages.
+          if(options.to && ( "group" in options.to || "node" in options.to )) {
+          
+            if( "node" in options.to ) {
+              $Array.forEach(isArray( options.to.node ) ? options.to.node : [ options.to.node ], function(to) {
+                $Array.forEach(scopes, function(scope) {
+                  JBus.services.messages.unicast.send( scope, to, msg );
+                });
               });
-            });
+            } if( "group" in options.to ) {
+              $Array.forEach(isArray( options.to.group ) ? options.to.group : [ options.to.group ], function(to) {
+                $Array.forEach(scopes, function(scope) {
+                  JBus.services.messages.multicast.send( scope, to, msg );
+                });
+              });
+            }
+            
           }
           // Otherwise, we send a broadcast user message.
           else {
@@ -389,28 +426,26 @@ var JBus = (function() {
           }
 
           if(!("filters" in options)) {
-            return this.listen({
-              any: options.any,
-              broadcast: options.broadcast,
-              unicast: options.unicast,
-              filters: { }
-            });
+            options.filters = { };
           }
 
           var any = options.any,
               broadcast = options.broadcast,
+              multicast = options.multicast,
               unicast = options.unicast,
               filters = options.filters;
 
           // We set up the listeners.
           var localListeners = [ ];
-          if(isFunction(any)) {
-            subscribeBroadcast(any);
-            subscribeUnicast(any);
-          } if(isFunction(broadcast)) {
-            subscribeBroadcast(broadcast);
-          } if(isFunction(unicast)) {
-            subscribeUnicast(unicast);
+          if(isFunction( any )) {
+            subscribeBroadcast( any );
+            subscribeUnicast( any );
+          } if(isFunction( broadcast )) {
+            subscribeBroadcast( broadcast );
+          } if(isFunction( multicast )) {
+            subscribeMulticast( multicast );
+          } if(isFunction( unicast )) {
+            subscribeUnicast( unicast );
           }
 
           /** Subscribes the given function as a broadcast listener. */
@@ -421,6 +456,33 @@ var JBus = (function() {
               // We store the subscription-cancelling function.
               localListeners.push( unsubscribe );
               listeners.push( unsubscribe );
+            });
+          }
+          
+          /** Subscribes the given function as a multicast listener. */
+          function subscribeMulticast(callback) {
+            $Array.forEach(scopes, function(scope) {
+              $Array.forEach(groups, function(name) {
+                var unsubscribe = JBus.services.messages.multicast.listen( scope, name, getListener() );
+
+                // We store the subscription-cancelling function.
+                localListeners.push( unsubscribe );
+                listeners.push( unsubscribe );
+                
+                function getListener() {
+                  return function(msg) {
+                    // If the message passes the filters, we return the message to the user.
+                    if( msg.type === MESSAGES.ENUMS.DATA && status === STATES.ENUMS.INITIALIZED && testMessage(msg) ) {
+                      callback.call( that, {
+                        from:  msg.from,
+                        to:    name,
+                        data:  msg.data,
+                        scope: scope
+                      } );
+                    }
+                  };
+                }
+              });
             });
           }
 
@@ -531,6 +593,16 @@ var JBus = (function() {
 
         // This array contains all subscription functions for unicast messages.
         var unicastListeners = [ ];
+        
+        // This array stores all groups to which we are subscribed
+        var groups;
+        if( isArray( options.group ) ) {
+          groups = options.group;
+        } else if( isString( options.group ) ) {
+          groups = [ options.group ];
+        } else {
+          groups = [ ];
+        } groups = $Array.filter( groups, isString );
 
         // This array stores all used scopes.
         var scopes;
@@ -574,6 +646,7 @@ var JBus = (function() {
               }
             }); that.ondestroy();
           }, scope: scopes,
+          group: groups,
           requires: options.requires,
           autoinit: false
         });
@@ -632,7 +705,9 @@ var JBus = (function() {
             listeners.push(
               JBus.services.messages.broadcast.listen( scope, listener ),
               JBus.services.messages.unicast.listen( scope, name, listener )
-            );
+            ); $Array.forEach(groups, function(group) {
+              listeners.push( JBus.services.messages.multicast.listen( scope, group, listener ) );
+            });
           
             /* We send an artificial Bonjour message to ourselves to register
                us in the unicastListeners array. */
@@ -692,28 +767,44 @@ var JBus = (function() {
 
           // Overloading support
           if( typeof options !== "object" || !("msg" in options)) {
-            return this.send({
+            options = {
               msg: options
-            });
+            };
+          }          
+
+          if( isString( options.to ) ) {
+            options.to = {
+              node: options.to
+            };
           }
-        
+          
           /* We copy the message passed by the user defaulting the "from" field
              to the debugger node's name. */
           var msg = { from: name };
           for(var key in options.msg) {
             var value = options.msg[key];
-            if(value != undefined) {
+            if(value !== undefined) {
               msg[key] = value;
             }
           }
 
-          // If there is a "to" field, we send unicast messages.
-          if(options.to) {
-            $Array.forEach(isArray( options.to ) ? options.to : [ options.to ], function(to) {
-              $Array.forEach(scopes, function(scope) {
-                JBus.services.messages.unicast.send( scope, to, msg );
+          // If there is a `to` field, we send unicast / multicast user messages.
+          if(options.to && ( "group" in options.to || "node" in options.to )) {
+          
+            if( "node" in options.to ) {
+              $Array.forEach(isArray( options.to.node ) ? options.to.node : [ options.to.node ], function(to) {
+                $Array.forEach(scopes, function(scope) {
+                  JBus.services.messages.unicast.send( scope, to, msg );
+                });
               });
-            });
+            } if( "group" in options.to ) {
+              $Array.forEach(isArray( options.to.group ) ? options.to.group : [ options.to.group ], function(to) {
+                $Array.forEach(scopes, function(scope) {
+                  JBus.services.messages.multicast.send( scope, to, msg );
+                });
+              });
+            }
+            
           }
           // Otherwise, we send a broadcast message.
           else {
@@ -738,17 +829,20 @@ var JBus = (function() {
 
           var any = options.any,
               broadcast = options.broadcast,
+              multicast = options.multicast,
               unicast = options.unicast;
 
           // We set up the listeners.
           var localListeners = [ ];
-          if(isFunction(any)) {
-            subscribeBroadcast(any);
-            subscribeUnicast(any);
-          } if(isFunction(broadcast)) {
-            subscribeBroadcast(broadcast);
-          } if(isFunction(unicast)) {
-            subscribeUnicast(unicast);
+          if(isFunction( any )) {
+            subscribeBroadcast( any );
+            subscribeUnicast( any );
+          } if(isFunction( broadcast )) {
+            subscribeBroadcast( broadcast );
+          } if(isFunction( multicast )) {
+            subscribeMulticast( multicast );
+          } if(isFunction( unicast )) {
+            subscribeUnicast( unicast );
           }
 
           /** Subscribes the given function as a broadcast listener. */
@@ -760,23 +854,49 @@ var JBus = (function() {
               localListeners.push( unsubscribe );
               listeners.push( unsubscribe );
             });
+          }
 
-            function getListener(scope, callback) {
-              return function(msg) {
-                // If the message has passed the filters, we return the message to the user.
-                if( status === STATES.ENUMS.INITIALIZED ) {
-                  callback.call( that, {
-                    msg: msg,
-                    scope: scope
-                  });
+          function getListener(scope, callback) {
+            return function(msg) {
+              // If the message has passed the filters, we return the message to the user.
+              if( status === STATES.ENUMS.INITIALIZED ) {
+                callback.call( that, {
+                  msg: msg,
+                  scope: scope
+                });
+              }
+            };
+          }
+          
+          /** Subscribes the given function as a multicast listener. */
+          function subscribeMulticast(callback) {
+            $Array.forEach(scopes, function(scope) {
+              $Array.forEach(groups, function(name) {
+                var unsubscribe = JBus.services.messages.multicast.listen( scope, name, getListener() );
+
+                // We store the subscription-cancelling function.
+                localListeners.push( unsubscribe );
+                listeners.push( unsubscribe );
+                
+                function getListener() {
+                  return function(msg) {
+                    // If the message has passed the filters, we return the message to the user.
+                    if( status === STATES.ENUMS.INITIALIZED ) {
+                      callback.call( that, {
+                        msg: msg,
+                        scope: scope,
+                        to: name
+                      });
+                    }
+                  };
                 }
-              };
-            }
+              });
+            });
           }
 
           /** Subscribes the given function as a unicast listener. */
           function subscribeUnicast(callback) {
-            var listener = getListener( callback );
+            var listener = getListener();
             var unsubscribe = function() {
               $Array.remove( unicastListeners, listener );
             }; unicastListeners.push( listener );
@@ -785,7 +905,7 @@ var JBus = (function() {
             localListeners.push( unsubscribe );
             listeners.push( unsubscribe );
 
-            function getListener(callback) {
+            function getListener() {
               return function( obj ) {
                 // If the message passes the filters, we return the message to the user.
                 if( status === STATES.ENUMS.INITIALIZED ) {
@@ -815,6 +935,8 @@ var JBus = (function() {
           this.listen({
             broadcast: function( obj ) {
               log("A broadcast message", obj.msg, "in scope", obj.scope);
+            }, multicast: function( obj ) {
+              log("A multicast message", obj.msg, "to", obj.to, "in scope", obj.scope);
             }, unicast: function( obj ) {
               log("A unicast message", obj.msg, "to", obj.to, "in scope", obj.scope);
             }
@@ -874,21 +996,56 @@ var JBus = (function() {
               return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.BROADCAST, function(msg) {
                 callback(msg);
               });
-            }
+            },
           
+        }, multicast: {
+         
+          send:            
+            // @annotate Method `JBus.services.messages.multicast.send`
+            function(scope, name, msg) {
+              /* We check whether the message is being sent to the multicast
+                 address of a group with a fully qualified domain name. */
+              if( !isQualified( name ) && scope === JBus.Scope() ) {
+                warn("A message is being sent to the multicast address of " +
+                  "a group", name, " without a fully qualified domain name in the default scope.");
+              } JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.MULTICAST + "::" + name, msg);
+            },
+            
+          listen:
+            // @annotate Method `JBus.services.messages.multicast.listen`
+            function(scope, name, callback) {
+              /* We check whether the message listener is being added to the
+                 multicast address of a group with a fully qualified domain name. */
+              if( !isQualified( name ) && scope === JBus.Scope() ) {
+                warn("A message listener is being added to the multicast address of " +
+                  "a group", name, "without a fully qualified domain name in the default scope.");
+              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.MULTICAST + "::" + name, function(msg) { 
+                callback(msg);
+              });
+            }
+
         }, unicast: {
          
-          send:
-            
+          send:            
             // @annotate Method `JBus.services.messages.unicast.send`
             function(scope, name, msg) {
-              JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, msg);
+              /* We check whether the message is being sent to the unicast
+                 address of a node with a fully qualified domain name. */
+              if( !isQualified( name ) && scope === JBus.Scope() ) {
+                warn("A message is being sent to the unicast address of " +
+                  "a node", name, "without a fully qualified domain name in the default scope.");
+              } JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, msg);
             },
             
           listen:
             // @annotate Method `JBus.services.messages.unicast.listen`
             function(scope, name, callback) {
-              return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, function(msg) {
+              /* We check whether the message listener is being added to the
+                 unicast address of a node with a fully qualified domain name. */
+              if( !isQualified( name ) && scope === JBus.Scope() ) {
+                warn("A message listener is being added to the unicast address of " +
+                  "a node", name, "without a fully qualified domain name in the default scope.");
+              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, function(msg) {
                 callback(msg);
               });
             }
@@ -1015,7 +1172,21 @@ var JBus = (function() {
   function msgToString() {
     return "{" + MESSAGES.STRINGS[this.type] + "}" +
       (this.from ? " from " + this.from : "");
-  };
+  }
+  
+  /** Logs the arguments to the console as a warning. */
+  function warn() {
+    log.apply(null, [ STRINGS.WARNING ].concat( new$Array( arguments ) ))
+  }
+  
+  /**
+   * Returns whether the given name is a fully qualified domain name.
+   * @param name - The given name.
+   * @return whether the given name is a fully qualified domain name.
+   */
+  function isQualified(name) {
+    return  /\./.test( name );
+  }
   
   return JBus;
 

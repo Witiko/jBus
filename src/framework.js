@@ -116,6 +116,35 @@ var $Array = {
     },
 
   /**
+   * Iterates over the given array calling the given
+   * callback function at each defined cell with the
+   * following parameters:
+   *
+   *   value, index, array
+   *
+   * If the callback function returns true, the filter
+   * function includes the element in the output array.
+   *
+   * @param arr - The given array.
+   * @param callback - The given callback function.
+   * @return the output array.
+   */
+  filter: "filter" in Array.prototype
+    ? function(arr, callback) {
+        return arr.filter( callback );
+      }
+    : function(arr, callback) {
+      var filtered = [ ];
+      for(var i = 0; i < arr.length; i++) {
+        if( i in arr ) {
+          if( callback( arr[i], i, arr ) ) {
+            filtered.push( arr[i] );
+          }
+        }
+      } return filtered;
+    },
+
+  /**
    * Returns the index at which the given array contains the
    * given value. If the array doesn't contain the given value,
    * -1 is returned instead.
