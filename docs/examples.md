@@ -393,4 +393,4 @@ Below is the output of the userscript #7:
 
 ## Sky is the limit ##
 
-The examples and patterns above were a mere taste of what you can do with jBus to whet your appetite. The architecture is general and allows you to implement any client-server or peer-to-peer bindings between your userscript components or individual userscripts.
+The examples and patterns above were a mere taste of jBus to whet your appetite. The architecture is general and allows you to implement any kind of bindings between your userscript components or individual userscripts.
