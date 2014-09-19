@@ -1,6 +1,6 @@
 # Example userscripts #
 
-In the following section, we will explore several patterns that can be used, when developing userscripts with the jBus library.
+In the following section, we will go over several example userscripts and explore several patterns that can be used, when developing with the jBus library.
 
 ## Beacon ##
 
@@ -274,6 +274,7 @@ Sometimes, you want for the userscripts to be able to state the paramers of the 
 
 var node = new JBus.Node({
   name: "name.witiko.jbus.examples.userscript#5",
+  description: "An echo subscription service",
   autoinit: false
 }); node.listen({
   unicast: function(msg) {
@@ -339,7 +340,6 @@ Sometimes it makes sense for a node to send several types of data:
 ```js
 // ==UserScript==
 // @name           An example userscript #7
-// @description    A beacon
 // @match          *://github.com/witiko/jbus
 // @require        http://tiny.cc/jBus
 // ==/UserScript==
@@ -368,6 +368,7 @@ var node = new JBus.Node({
 
 new JBus.Node({
   requires: "name.witiko.jbus.examples.userscript#7",
+  description: "A greeter node",
   oninit: function() {
     this.send({
       to: "name.witiko.jbus.examples.userscript#7",

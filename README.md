@@ -4,7 +4,7 @@
 
 In standard modern web applications, client-side scripts are either standalone, or tightly coupled with one another. Browser extensions and Greasemonkey userscripts, on the other hand, are running in a sandbox beneath an artificial `window` object and can only be loosely coupled via message-passing by sending custom DOM events, or by using [proprietary APIs][Chrome cross-extension messaging API].
 
-The problem is that tight coupling is often undesirable, proprietary APIs are non-portable and custom events are a very crude means of communication prone to misconfiguration and event name collisions. jBus, on the other hand, is a cross-extension messaging architecture with a simple API, which enables loose coupling between any two pieces of JavaScript code sharing as little as a DOM [event target][EventTarget].
+The problem is that tight coupling is often undesirable, proprietary APIs are non-portable and custom events are a very crude means of communication prone to misconfiguration and event name collisions. jBus, on the other hand, is a cross-extension messaging architecture designed with the prevention of naming collisions in mind, which features a simple but expressive API and which enables loose coupling between any two pieces of JavaScript code sharing as little as a DOM [event target][EventTarget].
 
   [Chrome cross-extension messaging API]: https://developer.chrome.com/extensions/messaging#external "Message Passing - Google Chrome"
   [EventTarget]: http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget "DOM 2 Events Specification"
