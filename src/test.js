@@ -83,7 +83,7 @@ var tests = {
       /* We construct a message object and check it has been correctly constructed. */
       var options = {
         from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
-        name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+        name: getRandomName(),
         payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
       }, msg = new JBus.messages.Data( options );
       
@@ -94,7 +94,6 @@ var tests = {
           msg.data.payload === options.payload ) {
         success();
       } else {
-        console.log( msg );
         failure();
       }
     }, "Object JBus.messages.Bonjour construction (omitting the from attribute)": function(success, failure) {
@@ -245,20 +244,6 @@ var tests = {
       }
       
       function destroy() {  }
-    }, "Method new JBus.Node().ondestroy": function(success, failure) {
-      /* We construct a new node with a DOM0-like attribute
-         and check that it has been added to the node object */
-      if( new JBus.Node({
-        oninit: init
-      }).oninit === init ) {
-        success();
-      } else {
-        failure();
-      }
-      
-      function init() {
-        this.destroy();
-      }
     }, "Object JBus.Node construction, attribute autoinit #1": function(success, failure) {
       /* We construct a new node without auto-initialization
          and we check whether it has been initialized once
@@ -847,6 +832,19 @@ var tests = {
       } else {
         success();
       }
+    }, "Method JBus~$Array.filter": function(success, failure) {
+      /* We check, whether the filtering works. */
+      var result = $Array.filter( [1, 2,, 3,,, 4, 5, 6, 7,,], function(n) {
+        return n % 2 === 0;
+      }), expected = [2, 4, 6];
+      if( result[0] === expected[0] &&
+          result[1] === expected[1] &&
+          result[2] === expected[2] &&
+          result.length === expected.length ) {
+        success();
+      } else {
+        failure();
+      }
     }, "Method JBus~$Array.indexOf #1": function(success, failure) {
       /* We check, whether the predicate holds. */
       if( $Array.indexOf( [ 1, 2, 3,, 4 ], 5 ) !== -1 ) {
@@ -1139,6 +1137,70 @@ var tests = {
           first.destroy();
         }
       });
+    }, "Object JBus.Node construction, attribute group (overload #1)": function(success, failure) {
+      /* We construct five nodes, three of which are listening
+         in a multicast group. We then send a message to the broadcast
+         group and we check that it has been received exactly three times. */
+      var name = getRandomGroupName(),
+          count = 0,
+          nodes = [
+            new JBus.Node,
+            new JBus.Node,
+            new JBus.Node({ group: name }),
+            new JBus.Node({ group: name }),
+            new JBus.Node({ group: name })
+          ];
+          
+      $Array.forEach(nodes, function(node) {
+        node.listen({
+          multicast: function() {
+            ++count;
+          }
+        });
+      }); nodes[0].send({
+        to: { group: name }
+      }); if(count === 3) {
+        success();
+      } else {
+        failure();
+      }
+      
+      $Array.forEach(nodes, function(node) {
+        node.destroy();
+      });
+    }, "Object JBus.Node construction, attribute group (overload #2)": function(success, failure) {
+      /* We construct five nodes, three of which are listening in multicast
+         groups. We then send a message to the broadcast groups and we check
+         that it has been received the right amount of times. */
+      var names = [
+            getRandomGroupName(),
+            getRandomGroupName()
+          ], count = 0,
+          nodes = [
+            new JBus.Node,
+            new JBus.Node,
+            new JBus.Node({ group: names[0] }),
+            new JBus.Node({ group: names    }),
+            new JBus.Node({ group: names[1] })
+          ];
+          
+      $Array.forEach(nodes, function(node) {
+        node.listen({
+          multicast: function() {
+            ++count;
+          }
+        });
+      }); nodes[0].send({
+        to: { group: names }
+      }); if(count === 4) {
+        success();
+      } else {
+        failure();
+      }
+      
+      $Array.forEach(nodes, function(node) {
+        node.destroy();
+      });
     }, "Object JBus.Node construction, attribute requires (satisfied, overload #1)": function(success, failure) {
       /* We construct two nodes with the second one
          depending on the first one and wait for the
@@ -1229,12 +1291,12 @@ var tests = {
         success();
         failure = function() {};
       } failure();
-    }, "Method new JBus.Node().send (unicast)": function(success, failure) {
+    }, "Method new JBus.Node().send (unicast, overload #1)": function(success, failure) {
       /* We construct two nodes and we send a message from the
          first one to the unicast address of the second
          one and we check that it has been received. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1251,15 +1313,96 @@ var tests = {
             }
           });
       sender.send({
-        to: receiver.getName(),
-        data: data
+        to: {
+          node: receiver.getName()
+        }, data: data
       });
-    }, "Method new JBus.Node().send (broadcast)": function(success, failure) {
+    }, "Method new JBus.Node().send (unicast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var data = {
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }, sender = new JBus.Node,
+          receiver = new JBus.Node;
+          receiver.listen({
+            unicast: function(msg) {
+              if( msg.from === sender.getName() &&
+                  msg.data.name === data.name &&
+                  msg.data.payload === data.payload ) {
+                success();
+              } else {
+                failure();
+              } this.destroy();
+              sender.destroy();
+            }
+          });
+      sender.send({
+        to: {
+          node: [ receiver.getName() ]
+        }, data: data
+      });
+    }, "Method new JBus.Node().send (multicast, overload #1)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the multicast address of a group the second
+         one is listening to and we check that it has been received. */
+      var data = {
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }, group = getRandomGroupName(),
+          sender = new JBus.Node,
+          receiver = new JBus.Node({ group: group });
+          receiver.listen({
+            multicast: function(msg) {
+              if( msg.from === sender.getName() &&
+                  msg.data.name === data.name &&
+                  msg.data.payload === data.payload ) {
+                success();
+              } else {
+                failure();
+              } this.destroy();
+              sender.destroy();
+            }
+          });
+      sender.send({
+        to: {
+          group: group
+        }, data: data
+      });
+    }, "Method new JBus.Node().send (multicast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the multicast address of a group the second
+         one is listening to and we check that it has been received. */
+      var data = {
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }, group = getRandomGroupName(),
+          sender = new JBus.Node,
+          receiver = new JBus.Node({ group: group });
+          receiver.listen({
+            multicast: function(msg) {
+              if( msg.from === sender.getName() &&
+                  msg.data.name === data.name &&
+                  msg.data.payload === data.payload ) {
+                success();
+              } else {
+                failure();
+              } this.destroy();
+              sender.destroy();
+            }
+          });
+      sender.send({
+        to: {
+          group: [ group ]
+        }, data: data
+      });
+    }, "Method new JBus.Node().send (broadcast, overload #1)": function(success, failure) {
       /* We construct two nodes and we send a message from the
          first one to the broadcast address and we check that
          it has been received by the second node. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1277,13 +1420,37 @@ var tests = {
       sender.send({
         data: data
       });
+    }, "Method new JBus.Node().send (broadcast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the broadcast address and we check that
+         it has been received by the second node. */
+      var data = {
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }, sender = new JBus.Node,
+          receiver = new JBus.Node;
+          receiver.listen({
+            broadcast: function(msg) {
+              if( msg.from === sender.getName() &&
+                  msg.data.name === data.name &&
+                  msg.data.payload === data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: { },
+        data: data
+      });
     }, "Method new JBus.Node().send (overload #1)": function(success, failure) {
       /* We construct two nodes and we send a message using
          the shorthand overload from the first one to the
          unicast address of the second one and we check that
          it has been received. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1342,8 +1509,34 @@ var tests = {
             }
           });
       sender.send( payload );
-    }, "Method new JBus.Node().listen, attribute broadcast": new RelativePath( "Method new JBus.Node().send (broadcast)" ),
-    "Method new JBus.Node().listen, attribute unicast": new RelativePath( "Method new JBus.Node().send (unicast)" ),
+    }, "Method new JBus.Node().send (overload #4)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var data = {
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }, sender = new JBus.Node,
+          receiver = new JBus.Node;
+          receiver.listen({
+            unicast: function(msg) {
+              if( msg.from === sender.getName() &&
+                  msg.data.name === data.name &&
+                  msg.data.payload === data.payload ) {
+                success();
+              } else {
+                failure();
+              } this.destroy();
+              sender.destroy();
+            }
+          });
+      sender.send({
+        to: receiver.getName(),
+        data: data
+      });
+    }, "Method new JBus.Node().listen, attribute broadcast": new RelativePath( "Method new JBus.Node().send (broadcast, overload #1)" ),
+    "Method new JBus.Node().listen, attribute multicast": new RelativePath( "Method new JBus.Node().send (multicast, overload #1)" ),
+    "Method new JBus.Node().listen, attribute unicast": new RelativePath( "Method new JBus.Node().send (unicast, overload #1)" ),
     "Method new JBus.Node().listen, attribute any": function(success, failure) {
       /* We construct two nodes and we send two messages
          from the first one:
@@ -1382,7 +1575,7 @@ var tests = {
          and check that it has not been received. */
       var count = 0,
           data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node,
@@ -1415,7 +1608,7 @@ var tests = {
          and check that it has not been received. */
       var count = 0,
           data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node,
@@ -1473,7 +1666,7 @@ var tests = {
          one and we check that it has been received despite
          the filters. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1498,7 +1691,7 @@ var tests = {
          one and we check that it has been received despite
          the filters. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1523,7 +1716,7 @@ var tests = {
          one and we check that it has been received despite
          the filters. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1548,7 +1741,7 @@ var tests = {
          one and we check that it has been received despite
          the filters. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           receiver = new JBus.Node;
@@ -1624,6 +1817,76 @@ var tests = {
           first.destroy();
         }
       });
+    }, "Object JBus.Debugger construction, attribute group (overload #1)": function(success, failure) {
+      /* We construct five nodes, three of which are listening
+         in a multicast group. We then send a message to the broadcast
+         group and we check that it has been received exactly three times. */
+      var name = getRandomGroupName(),
+          count = 0,
+          nodes = [
+            new JBus.Debugger({ autolog: false }),
+            new JBus.Debugger({ autolog: false }),
+            new JBus.Debugger({ group: name, autolog: false }),
+            new JBus.Debugger({ group: name, autolog: false }),
+            new JBus.Debugger({ group: name, autolog: false })
+          ];
+          
+      $Array.forEach(nodes, function(node) {
+        node.listen({
+          multicast: function() {
+            ++count;
+          }
+        });
+      }); nodes[0].send({
+        to: { group: name },
+        msg: new JBus.messages.Data({
+          from: nodes[0].getName()
+        }) 
+      }); if(count === 3) {
+        success();
+      } else {
+        failure();
+      }
+      
+      $Array.forEach(nodes, function(node) {
+        node.destroy();
+      });
+    }, "Object JBus.Debugger construction, attribute group (overload #2)": function(success, failure) {
+      /* We construct five nodes, three of which are listening in multicast
+         groups. We then send a message to the broadcast groups and we check
+         that it has been received the right amount of times. */
+      var names = [
+            getRandomGroupName(),
+            getRandomGroupName()
+          ], count = 0,
+          nodes = [
+            new JBus.Debugger({ autolog: false }),
+            new JBus.Debugger({ autolog: false }),
+            new JBus.Debugger({ group: names[0], autolog: false }),
+            new JBus.Debugger({ group: names   , autolog: false }),
+            new JBus.Debugger({ group: names[1], autolog: false })
+          ];
+          
+      $Array.forEach(nodes, function(node) {
+        node.listen({
+          multicast: function() {
+            ++count;
+          }
+        });
+      }); nodes[0].send({
+        to: { group: names },
+        msg: new JBus.messages.Data({
+          from: nodes[0].getName()
+        })
+      }); if(count === 4) {
+        success();
+      } else {
+        failure();
+      }
+      
+      $Array.forEach(nodes, function(node) {
+        node.destroy();
+      });
     }, "Object JBus.Debugger construction, attribute requires (satisfied, overload #1)": function(success, failure) {
       /* We construct two nodes with the second one
          depending on the first one and wait for the
@@ -1688,7 +1951,7 @@ var tests = {
           this.destroy();
         }, autolog: false
       });
-    }, "Method new JBus.Debugger().send (unicast)": function(success, failure) {
+    }, "Method new JBus.Debugger().send (unicast, overload #1)": function(success, failure) {
       /* We construct two nodes and we send a message from the
          first one to the unicast address of the second
          one and we check that it has been received. */
@@ -1696,7 +1959,212 @@ var tests = {
             autolog: false
           }), msg = new JBus.messages.Data({
             from: sender.getName(),
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            autolog: false
+          }); receiver.listen({
+            unicast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.to === receiver.getName() &&
+                  obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: {
+          node: receiver.getName()
+        }, msg: msg
+      });
+    }, "Method new JBus.Debugger().send (unicast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            autolog: false
+          }); receiver.listen({
+            unicast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.to === receiver.getName() &&
+                  obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: {
+          node: [ receiver.getName() ]
+        }, msg: msg
+      });
+    }, "Method new JBus.Debugger().send (multicast, overload #1)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var group = getRandomGroupName(),
+          sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            group: group,
+            autolog: false
+          }); receiver.listen({
+            multicast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.to === group &&
+                  obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: {
+          group: group
+        }, msg: msg
+      });
+    }, "Method new JBus.Debugger().send (multicast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var group = getRandomGroupName(),
+          sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            group: group,
+            autolog: false
+          }); receiver.listen({
+            multicast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.to === group &&
+                  obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: {
+          group: [ group ]
+        }, msg: msg
+      });
+    }, "Method new JBus.Debugger().send (broadcast, overload #1)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the broadcast address and we check that
+         it has been received by the second node. */
+      var sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            autolog: false
+          }); receiver.listen({
+            broadcast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        msg: msg
+      });
+    }, "Method new JBus.Debugger().send (broadcast, overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the broadcast address and we check that
+         it has been received by the second node. */
+      var sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            autolog: false
+          }); receiver.listen({
+            broadcast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send({
+        to: { },
+        msg: msg
+      });
+    }, "Method new JBus.Debugger().send (overload #1)": function(success, failure) {
+      /* We construct two nodes and we send a message using a
+         shorthand overload from the first one to the broadcast
+         address and we check that it has been received by
+         the second node. */
+      var sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
+            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+          }), receiver = new JBus.Debugger({
+            autolog: false
+          }); receiver.listen({
+            broadcast: function(obj) {
+              if(!obj || !obj.msg || !obj.msg.data) return;
+              if( obj.msg.from === sender.getName() &&
+                  obj.msg.data.name === msg.data.name &&
+                  obj.msg.data.payload === msg.data.payload ) {
+                success();
+                this.destroy();
+                sender.destroy();
+              }
+            }
+          });
+      sender.send( msg );
+    },"Method new JBus.Debugger().send (overload #2)": function(success, failure) {
+      /* We construct two nodes and we send a message from the
+         first one to the unicast address of the second
+         one and we check that it has been received. */
+      var sender = new JBus.Debugger({
+            autolog: false
+          }), msg = new JBus.messages.Data({
+            from: sender.getName(),
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }), receiver = new JBus.Debugger({
             autolog: false
@@ -1717,61 +2185,9 @@ var tests = {
         to: receiver.getName(),
         msg: msg
       });
-    }, "Method new JBus.Debugger().send (broadcast)": function(success, failure) {
-      /* We construct two nodes and we send a message from the
-         first one to the broadcast address and we check that
-         it has been received by the second node. */
-      var sender = new JBus.Debugger({
-            autolog: false
-          }), msg = new JBus.messages.Data({
-            from: sender.getName(),
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
-            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
-          }), receiver = new JBus.Debugger({
-            autolog: false
-          }); receiver.listen({
-            broadcast: function(obj) {
-              if(!obj || !obj.msg || !obj.msg.data) return;
-              if( obj.msg.from === sender.getName() &&
-                  obj.msg.data.name === msg.data.name &&
-                  obj.msg.data.payload === msg.data.payload ) {
-                success();
-                this.destroy();
-                sender.destroy();
-              }
-            }
-          });
-      sender.send({
-        msg: msg
-      });
-    }, "Method new JBus.Debugger().send (overload #1)": function(success, failure) {
-      /* We construct two nodes and we send a message using a
-         shorthand overload from the first one to the broadcast
-         address and we check that it has been received by
-         the second node. */
-      var sender = new JBus.Debugger({
-            autolog: false
-          }), msg = new JBus.messages.Data({
-            from: sender.getName(),
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
-            payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
-          }), receiver = new JBus.Debugger({
-            autolog: false
-          }); receiver.listen({
-            broadcast: function(obj) {
-              if(!obj || !obj.msg || !obj.msg.data) return;
-              if( obj.msg.from === sender.getName() &&
-                  obj.msg.data.name === msg.data.name &&
-                  obj.msg.data.payload === msg.data.payload ) {
-                success();
-                this.destroy();
-                sender.destroy();
-              }
-            }
-          });
-      sender.send( msg );
-    }, "Method new JBus.Debugger().listen, attribute broadcast": new RelativePath( "Method new JBus.Debugger().send (broadcast)" ),
-    "Method new JBus.Debugger().listen, attribute unicast": new RelativePath( "Method new JBus.Debugger().send (unicast)" ),
+    }, "Method new JBus.Debugger().listen, attribute broadcast": new RelativePath( "Method new JBus.Debugger().send (broadcast, overload #1)" ),
+    "Method new JBus.Debugger().listen, attribute multicast": new RelativePath( "Method new JBus.Debugger().send (multicast, overload #1)" ),
+    "Method new JBus.Debugger().listen, attribute unicast": new RelativePath( "Method new JBus.Debugger().send (unicast, overload #1)" ),
     "Method new JBus.Debugger().listen, attribute any": function(success, failure) {
       /* We construct two nodes and we send two messages
          from the first one:
@@ -1786,7 +2202,7 @@ var tests = {
             autolog: false
           }), msg = new JBus.messages.Data({
             from: sender.getName(),
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }), receiver = new JBus.Debugger({
             autolog: false
@@ -1817,7 +2233,7 @@ var tests = {
          we subsubscribe the listener, send another message
          and check that it has not been received. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           count = 0,
@@ -1849,7 +2265,7 @@ var tests = {
          it has been received. Then we subsubscribe the listener,
          send another message and check that it has not been received. */
       var data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node,
           count = 0,
@@ -1888,7 +2304,7 @@ var tests = {
             autolog: false
           }), msg = new JBus.messages.Data({
             from: sender.getName(),
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }), receiver = new JBus.Debugger({
             autolog: false
@@ -1929,21 +2345,117 @@ var tests = {
             } unsubscribe();
             node.destroy();
           }); node.init();
-    }, "Object JBus.Node protocol adherence (Lifecycle §2.3)": function(success, failure) {
-      /* We create a node and we send a collision message to it. The
-         node should not react. We then initialize the node and repeat
-         the same procedure. The node should now destroy itself. */
-      var scope = new JBus.Scope,
+    }, "Object JBus.Node protocol adherence (Lifecycle §2.3.1)": function(success, failure) {
+      /* We create a node and we send a data message to the broadcast
+         address. The node should not react. We then initialize the
+         node and repeat the same procedure. The node should now receive
+         the message. */
+      var counter = 0,
+          name = getRandomName(),
+          scope = new JBus.Scope,
           node = new JBus.Node({
             scope: scope,
             oninit: function() {
-              this.ondestroy = success;
-              JBus.services.messages.unicast.send( scope, this.getName(), new JBus.messages.Collision );
-            }, ondestroy: failure,
-            autoinit: false
+              send();
+            }, autoinit: false
           });
-      JBus.services.messages.unicast.send( scope, node.getName(), new JBus.messages.Collision );
-      node.init();      
+      node.listen({
+        broadcast: function() {
+          ++counter;
+        }, filters: {
+          name: name
+        }
+      });
+      send();
+      node.init();    
+      
+      function send() {
+        JBus.services.messages.broadcast.send( scope, new JBus.messages.Data({
+          from: node.getName(),
+          name: name
+        }));
+      }  
+      
+      if(counter === 1) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
+    }, "Object JBus.Node protocol adherence (Lifecycle §2.3.2)": function(success, failure) {
+      /* We create a node and we send a data message to the multicast
+         address of the groups the node is listening to. The node should
+         not react. We then initialize the node and repeat the same
+         procedure. The node should now receive the message. */
+      var counter = 0,
+          groups = [
+            getRandomGroupName(),
+            getRandomGroupName(),
+            getRandomGroupName()
+          ], scope = new JBus.Scope,
+          node = new JBus.Node({
+            scope: scope,
+            group: groups,
+            oninit: function() {
+              send();
+            }, autoinit: false
+          });
+      node.listen({
+        multicast: function() {
+          ++counter;
+        }
+      });
+      send();
+      node.init();    
+      
+      function send() {
+        $Array.forEach(groups, function(group) {
+          JBus.services.messages.multicast.send( scope, group, new JBus.messages.Data({
+            from: node.getName()
+          }));
+        });
+      }  
+      
+      if(counter === groups.length) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
+    }, "Object JBus.Node protocol adherence (Lifecycle §2.3.3)": function(success, failure) {
+      /* We create a node and we send a data message to its unicast address. The
+         node should not react. We then initialize the node and repeat
+         the same procedure. The node should now receive the message. */
+      var counter = 0,
+          scope = new JBus.Scope,
+          node = new JBus.Node({
+            scope: scope,
+            oninit: function() {
+              send();
+            }, autoinit: false
+          });
+      node.listen({
+        unicast: function() {
+          ++counter;
+        }
+      }); send();
+      node.init(); 
+      
+      function send() {
+        JBus.services.messages.unicast.send( scope, node.getName(), new JBus.messages.Data({
+          from: node.getName()
+        }));
+      }     
+      
+      if(counter === 1) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
     }, "Object JBus.Node protocol adherence (Lifecycle §2.4.1)": function(success, failure) {
       /* We create two nodes, each in the same two scopes and a third node, also in
          both scopes, which depends on the two nodes. We then initialize all nodes
@@ -2046,7 +2558,7 @@ var tests = {
             new JBus.Node({ autoinit: false }),
             new JBus.Node({ autoinit: false })
           ], data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Node({ requires: nodes[0].getName() }),
           receiver = new JBus.Node({ requires: nodes[1].getName() }),
@@ -2211,7 +2723,6 @@ var tests = {
           counts.bonjourMessages === 0 ) {
         success();
       } else {
-        console.log(counts);
         failure();
       }
       
@@ -2277,7 +2788,6 @@ var tests = {
           counts.bonjourMessages === 0 ) {
         success();
       } else {
-        console.log(counts);
         failure();
       }
       
@@ -2305,22 +2815,119 @@ var tests = {
             } unsubscribe();
             node.destroy();
           }); node.init();
-    }, "Object JBus.Debugger protocol adherence (Lifecycle §2.3)": function(success, failure) {
-      /* We create a node and we send a collision message to it. The
-         node should not react. We then initialize the node and repeat
-         the same procedure. The node should now destroy itself. */
-      var scope = new JBus.Scope,
+    }, "Object JBus.Debugger protocol adherence (Lifecycle §2.3.1)": function(success, failure) {
+      /* We create a node and we send a data message to the broadcast
+         address. The node should not react. We then initialize the
+         node and repeat the same procedure. The node should now receive
+         the message. */
+      var counter = 0,
+          name = getRandomName(),
+          scope = new JBus.Scope,
           node = new JBus.Debugger({
             scope: scope,
             oninit: function() {
-              this.ondestroy = success;
-              JBus.services.messages.unicast.send( scope, this.getName(), new JBus.messages.Collision );
-            }, ondestroy: failure,
-            autoinit: false,
+              send();
+            }, autoinit: false,
             autolog: false
           });
-      JBus.services.messages.unicast.send( scope, node.getName(), new JBus.messages.Collision );
-      node.init();      
+      node.listen({
+        broadcast: function(obj) {
+          if(obj.msg && obj.msg instanceof JBus.messages.Data &&
+             obj.msg.data.name === name) ++counter;
+        }
+      });
+      send();
+      node.init();    
+      
+      function send() {
+        JBus.services.messages.broadcast.send( scope, new JBus.messages.Data({
+          from: node.getName(),
+          name: name
+        }));
+      }  
+      
+      if(counter === 1) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
+    }, "Object JBus.Debugger protocol adherence (Lifecycle §2.3.2)": function(success, failure) {
+      /* We create a node and we send a data message to the multicast
+         address of the groups the node is listening to. The node should
+         not react. We then initialize the node and repeat the same
+         procedure. The node should now receive the message. */
+      var counter = 0,
+          groups = [
+            getRandomGroupName(),
+            getRandomGroupName(),
+            getRandomGroupName()
+          ], scope = new JBus.Scope,
+          node = new JBus.Debugger({
+            scope: scope,
+            group: groups,
+            oninit: function() {
+              send();
+            }, autoinit: false,
+            autolog: false
+          });
+      node.listen({
+        multicast: function() {
+          ++counter;
+        }
+      });
+      send();
+      node.init();    
+      
+      function send() {
+        $Array.forEach(groups, function(group) {
+          JBus.services.messages.multicast.send( scope, group, new JBus.messages.Data({
+            from: node.getName()
+          }));
+        });
+      }  
+      
+      if(counter === groups.length) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
+    }, "Object JBus.Debugger protocol adherence (Lifecycle §2.3.3)": function(success, failure) {
+      /* We create a node and we send a data message to its unicast address. The
+         node should not react. We then initialize the node and repeat
+         the same procedure. The node should now receive the message. */
+      var counter = 0,
+          scope = new JBus.Scope,
+          node = new JBus.Debugger({
+            scope: scope,
+            oninit: function() {
+              send();
+            }, autoinit: false,
+            autolog: false
+          });
+      node.listen({
+        unicast: function(obj) {
+          if(obj.msg && obj.msg instanceof JBus.messages.Data) ++counter;
+        }
+      }); send();
+      node.init(); 
+      
+      function send() {
+        JBus.services.messages.unicast.send( scope, node.getName(), new JBus.messages.Data({
+          from: node.getName()
+        }));
+      }     
+      
+      if(counter === 1) {
+        success();
+      } else {
+        failure();
+      }
+      
+      node.destroy();
     }, "Object JBus.Debugger protocol adherence (Lifecycle §2.4.1)": function(success, failure) {
       /* We create two nodes, each in the same two scopes and a third node, also in
          both scopes, which depends on the two nodes. We then initialize the third node
@@ -2425,7 +3032,7 @@ var tests = {
             new JBus.Debugger({ autoinit: false, autolog: false }),
             new JBus.Debugger({ autoinit: false, autolog: false })
           ], data = {
-            name: "<name.witiko.jbus.testsuite.name@" + $String.random() + ">",
+            name: getRandomName(),
             payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
           }, sender = new JBus.Debugger({ requires: nodes[0].getName(), autolog: false }),
           receiver = new JBus.Debugger({ requires: nodes[1].getName(), autolog: false }),
@@ -2597,7 +3204,6 @@ var tests = {
           counts.bonjourMessages === 0 ) {
         success();
       } else {
-        console.log(counts);
         failure();
       }
       
@@ -2664,7 +3270,6 @@ var tests = {
           counts.bonjourMessages === 0 ) {
         success();
       } else {
-        console.log(counts);
         failure();
       }
       
@@ -2675,3 +3280,11 @@ var tests = {
     }
   }
 };
+
+function getRandomGroupName() {
+  return "name.witiko.jbus.testsuite.group@" + $String.random();
+}
+
+function getRandomName() {
+  return "name.witiko.jbus.testsuite.name@" + $String.random();
+}
