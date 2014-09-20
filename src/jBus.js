@@ -1174,6 +1174,8 @@ var JBus = (function() {
       (this.from ? " from " + this.from : "");
   }
   
+  // # Utility function #
+  
   /** Logs the arguments to the console as a warning. */
   function warn() {
     log.apply(null, [ STRINGS.WARNING ].concat( new$Array( arguments ) ))
