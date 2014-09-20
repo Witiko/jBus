@@ -4,7 +4,10 @@ All functionality of the library is embedded in the `JBus` object with the `JBus
 
 ## Method `JBus.Scope` ##
 
-The `JBus.Scope` method acts as either a parameterless constructor of an anonymous scope, when invoked using the `new` keyword, or as a getter of the default scope, when invoked as a function.
+The `JBus.Scope` method acts as either a parameterless constructor of an anonymous private scope, when invoked using the `new` keyword, or as a getter of the default public scope, when invoked as a function:
+
+    var privateScope = new JBus.Scope,
+        publicScope = JBus.Scope();
 
 ## Object `JBus.Node` ##
 
@@ -390,7 +393,7 @@ The `scope` parameter is the scope to which the listener is going to be added, t
 
 The `JBus.services.messages.broadcast.send` method is used by the `JBus.Node` and `JBus.Debugger` objects to send messages to the broadcast address in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.broadcast.send( scope, msg )
+    JBus.services.messages.broadcast.send( scope, msg );
 
 The `scope` parameter is the scope in which the message is going to be sent and the `msg` parameter is the message being sent. The method has no return value.
 
@@ -398,7 +401,7 @@ The `scope` parameter is the scope in which the message is going to be sent and 
 
 The `JBus.services.messages.multicast.send` method is used by the `JBus.Node` and `JBus.Debugger` objects to send messages to the multicast address of the given group in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.multicast.send( scope, name, msg )
+    JBus.services.messages.multicast.send( scope, name, msg );
 
 The `scope` parameter is the scope in which the message is going to be sent, the `name` parameter is the name of the receiving group and the `msg` parameter is the message being sent. The method has no return value.
 
@@ -406,7 +409,7 @@ The `scope` parameter is the scope in which the message is going to be sent, the
 
 The `JBus.services.messages.unicast.send` method is used by the `JBus.Node` and `JBus.Debugger` objects to send messages to the unicast address of the given node in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.unicast.send( scope, name, msg )
+    JBus.services.messages.unicast.send( scope, name, msg );
 
 The `scope` parameter is the scope in which the message is going to be sent, the `name` parameter is the name of the recipient and the `msg` parameter is the message being sent. The method has no return value.
 
@@ -414,7 +417,7 @@ The `scope` parameter is the scope in which the message is going to be sent, the
 
 The `JBus.services.messages.broadcast.listen` method is used by the `JBus.Node` and `JBus.Debugger` objects to listen for incoming messages on the broadcast address in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.broadcast.listen( scope, callback )
+    JBus.services.messages.broadcast.listen( scope, callback );
 
 The `scope` parameter is the scope to which the listener is going to be added and the `callback` parameter is a reference to a function, which will be called each time a message is received on the broadcast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
 
@@ -422,7 +425,7 @@ The `scope` parameter is the scope to which the listener is going to be added an
 
 The `JBus.services.messages.unicast.listen` method is used by the `JBus.Node` and `JBus.Debugger` objects to listen for incoming messages on the multicast address of the given group in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.multicast.listen( scope, name, callback )
+    JBus.services.messages.multicast.listen( scope, name, callback );
 
 The `scope` parameter is the scope to which the listener is going to be added, the `name` parameter is a reference to a string containing the name of the group, on whose multicast address the listener is going to be listening, and the `callback` parameter is a reference to a function, which will be called each time a message is received on the multicast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
 
@@ -430,7 +433,7 @@ The `scope` parameter is the scope to which the listener is going to be added, t
 
 The `JBus.services.messages.unicast.listen` method is used by the `JBus.Node` and `JBus.Debugger` objects to listen for incoming messages on the unicast address of the given node in the given scope. Below is the most extensive way of calling the function:
 
-    JBus.services.messages.unicast.listen( scope, name, callback )
+    JBus.services.messages.unicast.listen( scope, name, callback );
 
 The `scope` parameter is the scope to which the listener is going to be added, the `name` parameter is a reference to a string containing the name of the node, on whose unicast address the listener is going to be listening, and the `callback` parameter is a reference to a function, which will be called each time a message is received on the unicast address in the given scope with the message as the function's first parameter. The method returns a function, which will remove the registered listener.
 

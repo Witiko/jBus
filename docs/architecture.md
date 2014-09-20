@@ -18,12 +18,12 @@ This effectively enables transfer of arbitrary data through an unlimited number 
 
 The node addressing scheme differentiates between three types of addresses:
 
-  1. *Broadcast* -- Events sent to this address are retrieved by all nodes, which are initializing or initialized.
-    * The broadcast address is `jBus::broadcast` and it addresses all nodes in the scope.
-  2. *Multicast* -- Events sent to this address are retrieved by all subscribed nodes, which are initializing or initialized.
-    * Multicast addresses are of the form `jBus::multicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the subscribed set of notes (hereinafter, group).
-  3. *Unicast* -- Events sent to these addresses are retrieved by the addressed node, if it's initializing or initialized.
-    * Unicast addresses are of the form `jBus::unicast::<name>`, where `<name>` is a name of the receiving node (hereinafter, recipient).
+  1. *Broadcast* -- Events named as this address are retrieved by all nodes, which are initializing or initialized.
+    * The broadcast address is `name.witiko.jbus.addresses.broadcast` and it addresses all nodes in the scope.
+  2. *Multicast* -- Events named as these addresses are retrieved by all subscribed nodes, which are initializing or initialized.
+    * Multicast addresses are of the form `name.witiko.jbus.addresses.multicast::<name>`, where `<name>` is a unique string identifier (hereinafter, name) of the subscribed set of notes (hereinafter, group).
+  3. *Unicast* -- Events named as these addresses are retrieved by the addressed node, if it's initializing or initialized.
+    * Unicast addresses are of the form `name.witiko.jbus.addresses.unicast::<name>`, where `<name>` is a name of the receiving node (hereinafter, recipient).
 
 Hereinafter, *sending a message to an address* means dispatching a custom event named as the address and containing the message object. Hereinafter, *listening for messages on an address* means adding an event listener to an event named as the address.
 

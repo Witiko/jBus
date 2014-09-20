@@ -118,13 +118,16 @@ Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
   2. _Isn't this essentially what [storage events][] are for?_
     
-    Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listening script will be notified about your changes, you can only store textual data, while jBus allows you to pass around any kind of data including functions.
-    
-    jBus also allows you to [scope](docs/examples.md#scoping) your messages, while there can only be one, global instance of either one of the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects. You can also build chains of [dependencies](docs/examples.md#dependencies) between individual jBus nodes.
+    Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listener will be notified about your changes, you can only store textual data, whereas a [custom events][CustomEvent]-based architecture (like jBus) allows you to pass around any kind of data including functions along with their [scope chain][Multiply-nested functions], which doesn't survive serialization to string.
+
+    By the same token, [storage events][] *do* offer functionality, which cannot be achieved using [custom events][CustomEvent]. Since the contents of the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects are specific to a protocol and a domain, any changes to either of these objects will emit a [storage event][storage events] in any open window or iframe containing a document from the given protocol and domain. This allows for functionality such as pausing the music playback in all windows other than the current one (as implemented by <http://soundcloud.com>). By contrast, a [custom events][CustomEvent]-based architecture (like jBus) only allows for event dispatchment within the original window and other windows and iframes, to which there is a reference.
+
+    It should now be clear that [custom events][CustomEvent]-based architectures (like jBus) and [storage events][]-based architectures each offer capabilities, which are mutually complementary, rather than one being a subset of the other.
 
 [localStorage]: http://www.w3.org/TR/webstorage/#the-localstorage-attribute "Web Storage"
 [sessionStorage]: http://www.w3.org/TR/webstorage/#the-sessionstorage-attribute "Web Storage"
 [Storage Events]: http://www.w3.org/TR/webstorage/#the-storage-event "Web Storage"
+[Multiply-nested functions]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions#Multiply-nested_functions "Functions and function scope - JavaScript | MDN"
 
 ## License (MIT) ##
 
