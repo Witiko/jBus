@@ -6,7 +6,7 @@ var JBus = (function() {
     WARNING: "Warning:",
     DEBUGGER: "A JBus debugger"
   }, PREFIXES = {
-    JBUS: "jBus",
+    JBUS: "name.witiko.jbus.addresses",
     BROADCAST: "broadcast",
     MULTICAST: "multicast",
     UNICAST: "unicast",
@@ -987,13 +987,13 @@ var JBus = (function() {
           send:          
             // @annotate Method `JBus.services.messages.broadcast.send`
             function(scope, msg) {
-              JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.BROADCAST, msg);
+              JBus.services.events.send(scope, PREFIXES.JBUS + "." + PREFIXES.BROADCAST, msg);
             },
             
           listen:
             // @annotate Method `JBus.services.messages.broadcast.listen`
             function(scope, callback) {
-              return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.BROADCAST, function(msg) {
+              return JBus.services.events.listen(scope, PREFIXES.JBUS + "." + PREFIXES.BROADCAST, function(msg) {
                 callback(msg);
               });
             }
@@ -1008,7 +1008,7 @@ var JBus = (function() {
               if( !isQualified( name ) && scope === JBus.Scope() ) {
                 warn("A message is being sent to the multicast address of " +
                   "a group", name, " without a fully qualified domain name in the default scope.");
-              } JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.MULTICAST + "::" + name, msg);
+              } JBus.services.events.send(scope, PREFIXES.JBUS + "." + PREFIXES.MULTICAST + "::" + name, msg);
             },
             
           listen:
@@ -1019,7 +1019,7 @@ var JBus = (function() {
               if( !isQualified( name ) && scope === JBus.Scope() ) {
                 warn("A message listener is being added to the multicast address of " +
                   "a group", name, "without a fully qualified domain name in the default scope.");
-              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.MULTICAST + "::" + name, function(msg) { 
+              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "." + PREFIXES.MULTICAST + "::" + name, function(msg) { 
                 callback(msg);
               });
             }
@@ -1034,7 +1034,7 @@ var JBus = (function() {
               if( !isQualified( name ) && scope === JBus.Scope() ) {
                 warn("A message is being sent to the unicast address of " +
                   "a node", name, "without a fully qualified domain name in the default scope.");
-              } JBus.services.events.send(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, msg);
+              } JBus.services.events.send(scope, PREFIXES.JBUS + "." + PREFIXES.UNICAST + "::" + name, msg);
             },
             
           listen:
@@ -1045,7 +1045,7 @@ var JBus = (function() {
               if( !isQualified( name ) && scope === JBus.Scope() ) {
                 warn("A message listener is being added to the unicast address of " +
                   "a node", name, "without a fully qualified domain name in the default scope.");
-              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "::" + PREFIXES.UNICAST + "::" + name, function(msg) {
+              } return JBus.services.events.listen(scope, PREFIXES.JBUS + "." + PREFIXES.UNICAST + "::" + name, function(msg) {
                 callback(msg);
               });
             }
