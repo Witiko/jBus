@@ -13,7 +13,7 @@ indent() {
 REGEX='\s*//\s*@\s*include\s*'
 IFS=; while read -r "line" || [ -n "$line" ]; do
   if printf "%s" "$line" | grep --quiet "$REGEX"; then
-    SPACES=$(( $( printf "%s" "$line" | sed 's/[^ ].*//' | wc -c ) - 1 ))
+    SPACES=$(( $( printf "%s" "$line" | sed 's/[^ ].*//' | wc -c ) ))
     cat src/"$( printf "%s" "$line" | sed "s#$REGEX##" )".js | indent $SPACES
   else
     printf "%s\n" "$line"
