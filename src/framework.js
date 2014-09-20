@@ -6,7 +6,7 @@
 function isString(str) {
   return typeof str === "string" ||
                 str instanceof String;
-};
+}
 
 /**
  * Returns whether or not a value is a regexp.
