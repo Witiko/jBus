@@ -110,6 +110,13 @@ To be able to use jBus on your web page, input the following code in either the 
 
 Replace `jBus.js` with a pathname to the jBus build you wish to use.
 
+## Unit testing ##
+
+By loading the `src/test.html` file in your browser, you can run a suite of tests against the `src/jBus.js` and `src/framework.js` files. You can use this to check, whether:
+
+  * jBus is compatible with a given browser.
+  * Your modified version of jBus works as intended.
+
 ## FAQ ##
 
   1. _Isn't this essentially what [custom events][CustomEvent] are for?_
@@ -120,7 +127,7 @@ Replace `jBus.js` with a pathname to the jBus build you wish to use.
     
     Not quite. While it is true that you can store data in the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects and any listener will be notified about your changes, you can only store textual data, whereas a [custom events][CustomEvent]-based architecture (like jBus) allows you to pass around any kind of data including functions along with their [scope chain][Multiply-nested functions], which doesn't survive serialization to string.
 
-    By the same token, [storage events][] *do* offer functionality, which cannot be achieved using [custom events][CustomEvent]. Since the contents of the [`localStorage`][localStorage] and [`sessionStorage`][sessionStorage] objects are specific to a protocol and a domain, any changes to either of these objects will emit a [storage event][storage events] in any open window or iframe containing a document from the given protocol and domain. This allows for functionality such as pausing the music playback in all windows other than the current one (as implemented by <http://soundcloud.com>). By contrast, a [custom events][CustomEvent]-based architecture (like jBus) only allows for event dispatchment within the original window and other windows and iframes, to which there is a reference.
+    By the same token, [storage events][] *do* offer functionality, which cannot be achieved using [custom events][CustomEvent]. Since the [`localStorage`][localStorage] object is specific to a protocol and a domain (hereinafter an origin), any change to the object will emit a [storage event][storage events] in any open window / iframe containing the [`localStorage`][localStorage] object of the given origin other than the event  dispatcher. This allows for functionality such as pausing music playback in all windows other than the current one (as implemented by [soundcloud.com](http://soundcloud.com)). By contrast, a [custom events][CustomEvent]-based architecture (like jBus) only allows for event dispatchment within the original window and other windows and iframes, to which there is a reference.
 
     It should now be clear that [custom events][CustomEvent]-based architectures (like jBus) and [storage events][]-based architectures each offer capabilities, which are mutually complementary, rather than one being a subset of the other.
 

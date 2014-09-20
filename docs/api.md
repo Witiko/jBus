@@ -533,10 +533,3 @@ The `name` attribute may be a reference to a string containing the name of the d
 ### Attribute `payload` ###
 
 The `payload` attribute may be a reference to the data in the data message.
-
-# Unit testing #
-
-By loading the `src/test.html` file in your browser, you can run a suite of tests against the `src/jBus.js` and `src/framework.js` files. You can use this to check, whether:
-
-  * jBus is compatible with a given browser.
-  * Your modified version of jBus works as intended.
