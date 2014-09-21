@@ -117,6 +117,8 @@ By loading the `src/test.html` file in your browser, you can run a suite of test
   * jBus is compatible with a given browser.
   * Your modified version of jBus works as intended.
 
+If the you only want to check browser compatibility, [the online version](https://dl.dropboxusercontent.com/u/48267088/JBus/test/test.html) may be a more convenient route for you.
+
 ## FAQ ##
 
   1. _Isn't this essentially what [custom events][CustomEvent] are for?_
