@@ -23,7 +23,14 @@ function isRegExp(rexp) {
  * @return whether or not a value is a function.
  */
 function isFunction(func) {
-  return func instanceof Function;
+  return func instanceof Function ||
+         typeof func === "function";
+  /* This ^ makes the test work as
+     expected for functions received
+     from other window objects -- the
+     function is then an instance of
+     otherWindow.Function rather than
+     Function. */
 }
 
 /**
