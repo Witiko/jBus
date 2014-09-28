@@ -1,8 +1,12 @@
-var JBus = (function() {
+var JBus = (function(debug) {
+
+  // # Framework #
+  
+  // @include framework
 
   // # Constants #
   var STRINGS = {
-    LOGGER: "[JBus]",
+    LOGGER: "[JBus@" + $String.random() + "]",
     WARNING: "Warning:",
     DEBUGGER: "A JBus debugger"
   }, PREFIXES = {
@@ -41,8 +45,6 @@ var JBus = (function() {
   };
 
   // # Utility functions #
-  
-  // @include framework
 
   /** Logs the arguments to the console. */
   var log = window.console && isFunction( window.console.log ) ? function() {
@@ -241,7 +243,7 @@ var JBus = (function() {
                 // We handle an incoming collision control message.
                 case MESSAGES.ENUMS.COLLISION:
                   // We destroy this node.
-                  destroy(true);
+                  that.destroy();
 
                 // We handle an incoming bonjour control message.
                 case MESSAGES.ENUMS.BONJOUR:
@@ -311,10 +313,6 @@ var JBus = (function() {
 
         // @annotate Method `new JBus.Node().destroy`
         this.destroy = function() {
-          destroy(false);
-        };
-
-        function destroy(silently) {
 
           // First, we handle the current status.
           switch(status) {
@@ -342,10 +340,8 @@ var JBus = (function() {
             unsubscribe();
           }); listeners = [ ];
 
-          /* If we're shutting down the usual way, we send a bye control message to all other nodes.
-             If we're shutting down due to a name collision, we don't send any bye message to prevent
-             negating the bonjour control message sent by our namesake. */
-          if(!silently) announceUninit();
+          // We send a bye control message to all other nodes.
+          announceUninit();
 
           // Finally, we will notify the user that the node has been destroyed.
           that.ondestroy();
@@ -564,392 +560,6 @@ var JBus = (function() {
 
       },
       
-    Debugger:
-      // @annotate Object `JBus.Debugger`
-      function(options) {
-
-        // Overloading support
-        options = options || {};
-
-        // We typecheck the passed functions
-        if( "oninit" in options && !isFunction(options.oninit) ) {
-          throw new TypeError("The `oninit` attribute is not a function.");
-        } if( "onuninit" in options && !isFunction(options.onuninit) ) {
-          throw new TypeError("The `onuninit` attribute is not a function.");
-        } if( "ondestroy" in options && !isFunction(options.ondestroy) ) {
-          throw new TypeError("The `ondestroy` attribute is not a function.");
-        }
-        
-        this.oninit = options.oninit || function() {};
-        this.onuninit = options.onuninit || function() {};
-        this.ondestroy = options.ondestroy || function() {};
-
-        var status = STATES.ENUMS.UNINITIALIZED;    
-        var name = PREFIXES.DEBUGGER + "@" + $String.random();
-        var that = this;
-
-        // This array contains all event unsubscription functions for this node.
-        var listeners = [ ];
-
-        // This array contains all subscription functions for unicast messages.
-        var unicastListeners = [ ];
-        
-        // This array stores all groups to which we are subscribed
-        var groups;
-        if( isArray( options.group ) ) {
-          groups = options.group;
-        } else if( isString( options.group ) ) {
-          groups = [ options.group ];
-        } else {
-          groups = [ ];
-        } groups = $Array.filter( groups, isString );
-
-        // This array stores all used scopes.
-        var scopes;
-        if( isArray( options.scope ) && options.scope.length > 0 ) {
-          scopes = new$Array( options.scope );
-        } else if( options.scope ) {
-          scopes = [ options.scope ];
-        } else {
-          scopes = [ JBus.Scope() ];
-        } this.scopes = scopes;
-
-        /* This array contains event unsubscription functions for unicast messages
-           to all online JBus nodes in all scopes. */
-        var nodes = scopes.map(function() {
-          return { };
-        }); this.nodes = nodes;
-
-        // We construct the underlying JBus node.
-        var node = new JBus.Node( {
-          name: name,
-          description: STRINGS.DEBUGGER,
-          oninit: function() {
-            status = STATES.ENUMS.INITIALIZED;
-            // Once initialized, we send a broadcast control Ping message to scan all available nodes.
-            $Array.forEach(scopes, function(scope) {
-              JBus.services.messages.broadcast.send( scope, new JBus.messages.Ping({ from: name }) );
-            }); that.oninit();
-          }, onuninit: function() {
-            status = STATES.ENUMS.INITIALIZING;
-            that.onuninit();
-          }, ondestroy: function() {
-            status = STATES.ENUMS.DESTROYED;
-            // When destroyed, we unsubscribe all message listeners.
-            $Array.forEach(listeners, function(unsubscribe) {
-              unsubscribe();
-            }); listeners = [ ];
-            $Array.forEach(nodes, function(scope) {
-              for(var node in scope) {
-                scope[node]();
-                delete scope[node];
-              }
-            }); that.ondestroy();
-          }, scope: scopes,
-          group: groups,
-          requires: options.requires,
-          autoinit: false
-        });
-
-        /* If the window containing any of the scopes is being closed,
-           the debugger unsubscribes from any unicast messages in that
-           scope and removes the scope from both the scopes and the nodes array. */
-        $Array.forEach(scopes, function(scope) {
-          var doc, win;
-
-          // The scope is a window.
-          if("window" in scope) {
-            win = scope;
-          }
-          // The scope is a document.
-          else if("doctype" in scope) {
-            doc = scope;
-            if(doc.defaultView) {
-              win = doc.defaultView;
-            }
-          }
-          // The scope is a node.
-          else {
-            doc = scope.ownerDocument;
-            if(doc && doc.defaultView) {
-              win = doc.defaultView;
-            }
-          }
-
-          if(win && win !== window) {
-            win.addEventListener("unload", function() {
-              var index = scopes.indexOf(scope);
-              for(var name in nodes[index]) {
-                nodes[index][name]();
-              } scopes.splice( index, 1 );
-              nodes.splice( index, 1 );
-            }, false);
-          }
-        });
-        
-        // @annotate Method `new JBus.Debugger().getName`
-        this.getName = function() {
-          return node.getName();
-        };
-
-        // @annotate Method `new JBus.Debugger().init`
-        this.init = function() {
-          status = STATES.ENUMS.INITIALIZING;
-
-          // First, we start listening for messages.
-          $Array.forEach(scopes, function(scope, scopeIndex) {
-
-            var nodeArray = nodes[scopeIndex];
-
-            // We store the subscription-cancelling functions.
-            listeners.push(
-              JBus.services.messages.broadcast.listen( scope, listener ),
-              JBus.services.messages.unicast.listen( scope, name, listener )
-            ); $Array.forEach(groups, function(group) {
-              listeners.push( JBus.services.messages.multicast.listen( scope, group, listener ) );
-            });
-          
-            /* We send an artificial Bonjour message to ourselves to register
-               us in the unicastListeners array. */
-            listener( new JBus.messages.Bonjour( {
-              from: name
-            }));
-
-            function listener(msg) {
-              var node = msg.from;
-              switch(msg.type) {
-
-                // We handle an incoming non-bye message.
-                case MESSAGES.ENUMS.COLLISION:
-                case MESSAGES.ENUMS.BONJOUR:
-                case MESSAGES.ENUMS.PING:
-                case MESSAGES.ENUMS.DATA:
-                  if(node && !(node in nodeArray)) {
-                    /* We start listening for unicast messages for that node and pass them
-                       to the functions in the unicastListeners array. */
-                    nodeArray[node] = JBus.services.messages.unicast.listen( scope, node, function(msg) {
-                      listener( msg );
-                      $Array.forEach(unicastListeners, function(listener) {
-                        listener( {
-                          to: node,
-                          msg: msg,
-                          scope: scope
-                        });
-                      })
-                    });
-                  } break;
-
-                // We handle an incoming bye control message.
-                case MESSAGES.ENUMS.BYE:
-                  if(node in nodeArray) {
-                    // We stop listening for unicast messages to that node.
-                    nodeArray[node]();
-                    delete nodeArray[node];
-                  } break;
-
-              }
-            }
-          });
-
-          // Finally, we initialize the underlying JBus node.
-          node.init();
-
-        };
-
-        // @annotate Method `new JBus.Debugger().destroy`
-        this.destroy = function() {
-          node.destroy();
-        };
-
-        // @annotate Method `new JBus.Debugger().send`
-        this.send = function(options) {
-          if(!options || status !== STATES.ENUMS.INITIALIZED) return;
-
-          // Overloading support
-          if( typeof options !== "object" || !("msg" in options)) {
-            options = {
-              msg: options
-            };
-          }          
-
-          if( isString( options.to ) ) {
-            options.to = {
-              node: options.to
-            };
-          }
-          
-          /* We copy the message passed by the user defaulting the "from" field
-             to the debugger node's name. */
-          var msg = { from: name };
-          for(var key in options.msg) {
-            var value = options.msg[key];
-            if(value !== undefined) {
-              msg[key] = value;
-            }
-          }
-
-          // If there is a `to` field, we send unicast / multicast user messages.
-          if(options.to && ( "group" in options.to || "node" in options.to )) {
-          
-            if( "node" in options.to ) {
-              $Array.forEach(isArray( options.to.node ) ? options.to.node : [ options.to.node ], function(to) {
-                $Array.forEach(scopes, function(scope) {
-                  JBus.services.messages.unicast.send( scope, to, msg );
-                });
-              });
-            } if( "group" in options.to ) {
-              $Array.forEach(isArray( options.to.group ) ? options.to.group : [ options.to.group ], function(to) {
-                $Array.forEach(scopes, function(scope) {
-                  JBus.services.messages.multicast.send( scope, to, msg );
-                });
-              });
-            }
-            
-          }
-          // Otherwise, we send a broadcast message.
-          else {
-            $Array.forEach(scopes, function(scope) {
-              JBus.services.messages.broadcast.send( scope, msg );
-            });
-          }
-
-        };
-
-        // @annotate Method `new JBus.Debugger().listen`
-        this.listen = function(options) {
-
-          if(!options || status == STATES.ENUMS.DESTROYED) return;
-
-          // Overloading support
-          if(isFunction(options)) {
-            return this.listen({
-              any: options
-            });
-          }
-
-          var any = options.any,
-              broadcast = options.broadcast,
-              multicast = options.multicast,
-              unicast = options.unicast;
-
-          // We set up the listeners.
-          var localListeners = [ ];
-          if(isFunction( any )) {
-            subscribeBroadcast( any );
-            subscribeUnicast( any );
-          } if(isFunction( broadcast )) {
-            subscribeBroadcast( broadcast );
-          } if(isFunction( multicast )) {
-            subscribeMulticast( multicast );
-          } if(isFunction( unicast )) {
-            subscribeUnicast( unicast );
-          }
-
-          /** Subscribes the given function as a broadcast listener. */
-          function subscribeBroadcast(callback) {
-            $Array.forEach(scopes, function(scope) {
-              var unsubscribe = JBus.services.messages.broadcast.listen( scope, getListener( scope, callback ) );
-
-              // We store the subscription-cancelling function.
-              localListeners.push( unsubscribe );
-              listeners.push( unsubscribe );
-            });
-          }
-
-          function getListener(scope, callback) {
-            return function(msg) {
-              // If the message has passed the filters, we return the message to the user.
-              if( status === STATES.ENUMS.INITIALIZED ) {
-                callback.call( that, {
-                  msg: msg,
-                  scope: scope
-                });
-              }
-            };
-          }
-          
-          /** Subscribes the given function as a multicast listener. */
-          function subscribeMulticast(callback) {
-            $Array.forEach(scopes, function(scope) {
-              $Array.forEach(groups, function(name) {
-                var unsubscribe = JBus.services.messages.multicast.listen( scope, name, getListener() );
-
-                // We store the subscription-cancelling function.
-                localListeners.push( unsubscribe );
-                listeners.push( unsubscribe );
-                
-                function getListener() {
-                  return function(msg) {
-                    // If the message has passed the filters, we return the message to the user.
-                    if( status === STATES.ENUMS.INITIALIZED ) {
-                      callback.call( that, {
-                        msg: msg,
-                        scope: scope,
-                        to: name
-                      });
-                    }
-                  };
-                }
-              });
-            });
-          }
-
-          /** Subscribes the given function as a unicast listener. */
-          function subscribeUnicast(callback) {
-            var listener = getListener();
-            var unsubscribe = function() {
-              $Array.remove( unicastListeners, listener );
-            }; unicastListeners.push( listener );
-
-            // We store the subscription-cancelling function.
-            localListeners.push( unsubscribe );
-            listeners.push( unsubscribe );
-
-            function getListener() {
-              return function( obj ) {
-                // If the message passes the filters, we return the message to the user.
-                if( status === STATES.ENUMS.INITIALIZED ) {
-                  callback.call( that, obj );
-                }
-              };
-            }
-          }
-
-          /** Unsubscribes the node from further messages. */
-          return function() {
-            $Array.forEach(localListeners, function(unsubscribe) {
-              $Array.remove( listeners, unsubscribe );
-              unsubscribe();
-            }); localListeners = [];
-          };
-
-        };
-
-        // @annotate Method `new JBus.Debugger().toString`
-        this.toString = function() {
-          return node.toString();
-        }
-
-        // We start sending output to the console unless explicitly stated otherwise.
-        if(options.autolog !== false) {
-          this.listen({
-            broadcast: function( obj ) {
-              log("A broadcast message", obj.msg, "in scope", obj.scope);
-            }, multicast: function( obj ) {
-              log("A multicast message", obj.msg, "to", obj.to, "in scope", obj.scope);
-            }, unicast: function( obj ) {
-              log("A unicast message", obj.msg, "to", obj.to, "in scope", obj.scope);
-            }
-          });
-        }
-
-        // We autoinitialize the node unless explicitly stated otherwise.
-        if(options.autoinit !== false) {
-          this.init();
-        }
-
-      },
-      
     // Additional services
     services: {
       // Physical layer services (event senders / listeners)
@@ -987,7 +597,9 @@ var JBus = (function() {
           send:          
             // @annotate Method `JBus.services.messages.broadcast.send`
             function(scope, msg) {
-              JBus.services.events.send(scope, PREFIXES.JBUS + "." + PREFIXES.BROADCAST, msg);
+              if(debug) {
+                log("A broadcast message", msg, "in scope", scope);
+              } JBus.services.events.send(scope, PREFIXES.JBUS + "." + PREFIXES.BROADCAST, msg);
             },
             
           listen:
@@ -1003,6 +615,9 @@ var JBus = (function() {
           send:            
             // @annotate Method `JBus.services.messages.multicast.send`
             function(scope, name, msg) {
+              if(debug) {
+                log("A multicast message", msg, "to", name, "in scope", scope);
+              }
               /* We check whether the message is being sent to the multicast
                  address of a group with a fully qualified domain name. */
               if( !isQualified( name ) && scope === JBus.Scope() ) {
@@ -1029,6 +644,9 @@ var JBus = (function() {
           send:            
             // @annotate Method `JBus.services.messages.unicast.send`
             function(scope, name, msg) {
+              if(debug) {
+                log("A unicast message", msg, "to", name, "in scope", scope);
+              }
               /* We check whether the message is being sent to the unicast
                  address of a node with a fully qualified domain name. */
               if( !isQualified( name ) && scope === JBus.Scope() ) {
@@ -1192,4 +810,4 @@ var JBus = (function() {
   
   return JBus;
 
-})();
+})(true);
