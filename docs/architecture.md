@@ -144,7 +144,6 @@ A node has several properties:
     2. Switches to the uninitialized state for the purpose of notifying the application.
     3. Switches to the destroyed state.
     4. Stops listening for any messages in all its scopes.
-  8. When the initializing or initialized  in any scope, the node:
 
 ## Applications ##
 
