@@ -131,7 +131,7 @@ If the you only want to check browser compatibility, [the online version](https:
 
   1. _Isn't this essentially what [custom events][CustomEvent] are for?_
     
-    It is. jBus is an [architecture](docs/architecture.md) built on top of [custom events][CustomEvent], which also allows for [scoping](docs/examples.md#scoping), [dependencies](docs/examples.md#dependencies) and [unicast + multicast messaging](docs/architecture.md#addresses). If global broadcasting of events is all you need, you can equally well use [custom events][CustomEvent] directly.
+    It is. jBus is an [architecture](docs/architecture.md) built on top of custom events, which also allows for [scoping](docs/examples.md#scoping), [dependencies](docs/examples.md#dependencies) and [unicast + multicast messaging](docs/architecture.md#addresses). If global broadcasting of events is all you need, you can equally well use [custom events][CustomEvent] directly.
 
   2. _Isn't this essentially what [storage events][] are for?_
     
