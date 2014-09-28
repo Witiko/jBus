@@ -139,13 +139,12 @@ A node has several properties:
     3. If the node operates in multiple scopes, it sends a ping message to the unicast addresses of all the remaining required nodes in all its scopes.
   6. When the initialized node has received a ping message in any scope, the node:
     1. Sends a bonjour message to the sender's unicast address in the given scope.
-  7. When the applications destroys the initializing or initialized node, it:
+  7. When the applications destroys the initializing or initialized node, or the node has received a collision message in any scope, it:
     1. Sends a bye message to the broadcast address in all its scopes.
     2. Switches to the uninitialized state for the purpose of notifying the application.
     3. Switches to the destroyed state.
     4. Stops listening for any messages in all its scopes.
-  8. When the initializing or initialized node has received a collision message in any scope, the node:
-    1. Behaves as if it were destroyed by the application except for sending a bye message.
+  8. When the initializing or initialized  in any scope, the node:
 
 ## Applications ##
 

@@ -39,12 +39,16 @@ jBus is compatible with any browser, which supports [ECMAScript 3+][ECMA-262 3rd
 
 The assembly of the jBus source files requires a [POSIX.2][]-compliant environment. To begin the assembly, run the `make build` command in the uppermost folder of the project. At the end of the process, the following files will be present in the `build` folder:
 
-  * `jBus.js` -- A static build of jBus, which defines the `JBus.Node` object constructor and the `JBus.Scope` object constructor and method.
-  * `jBus.debug.js` -- A static build of jBus, which defines:
-    * The `JBus.Node` and `JBus.Debugger` object constructors.
+  * `jBus.js` -- A static build of jBus, which defines:
+    * The `JBus.Node` object constructor.
     * The `JBus.Scope` object constructor and method.
-    * The `JBus.Node.messages.*` object constructors.
-    * The `JBus.Node.services.*` methods.
+  * `jBus.debug.js` -- A static build of jBus, which defines:
+    * Logs any outgoing messages to the console.
+    * Defines:
+        * The `JBus.Node` object constructor.
+        * The `JBus.Scope` object constructor and method.
+        * The `JBus.Node.messages.*` object constructors.
+        * The `JBus.Node.services.*` methods.
 
 [POSIX.2]: http://pubs.opengroup.org/onlinepubs/009695399/ "The Open Group Base Specifications Issue 6"
 
@@ -52,12 +56,16 @@ The assembly of the jBus source files requires a [POSIX.2][]-compliant environme
 
 The minification of the jBus source files requires the `closure-compiler` binary of the [Closure Compiler by Google][] to be executable and to reside within one of the directories in the `PATH` environment variable. To begin the minification, run the `make min` command in the uppermost folder of the project. At the end of the process, the following files will be present in the `build` folder:
 
-  * `jBus.min.js` -- A static and minified build of jBus, which defines the `JBus.Node` object constructor and the `JBus.Scope` object constructor and method.
-  * `jBus.debug.min.js` -- A static and minified build of jBus, which defines:
-    * The `JBus.Node` and `JBus.Debugger` object constructors.
+  * `jBus.min.js` -- A static and minified build of jBus, which defines:
+    * The `JBus.Node` object constructor.
     * The `JBus.Scope` object constructor and method.
-    * The `JBus.Node.messages.*` object constructors.
-    * The `JBus.Node.services.*` methods.
+  * `jBus.min.debug.js` -- A static and minified build of jBus, which:
+    * Logs any outgoing messages to the console.
+    * Defines:
+        * The `JBus.Node` object constructor.
+        * The `JBus.Scope` object constructor and method.
+        * The `JBus.Node.messages.*` object constructors.
+        * The `JBus.Node.services.*` methods.
 
 The latest minified jBus builds are also available online:
 
