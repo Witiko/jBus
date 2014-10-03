@@ -25,6 +25,8 @@ The `JBus.Node` method acts as a constructor of a node. Below is the most extens
       autoinit: ... ,
     });
 
+The `new` keyword can be ommited when calling the contructor.
+
 ### Attribute `name` ###
 
 The `name` attribute may contain a reference to a string representing the name of the node. The name should be a fully qualified domain name to prevent collisions. This rule can be relaxed for nodes, which only operate in anonymous private scopes. If the `name` attribute is undefined, a name `name.witiko.jbus.anonymous@` followed by a pseudo-random hash obtained by executing `Math.random().toString(36).replace(/0\./, "")` will be used instead.
@@ -298,6 +300,8 @@ The `JBus.messages.Bonjour` method acts as a constructor of a bonjour message ob
       description: ...
     });
 
+The `new` keyword can be ommited when calling the contructor.
+
 ### Attribute `from` ###
 
 The `from` attribute is a reference to a string containing the name of the sender of the message.
@@ -324,6 +328,8 @@ The `JBus.messages.Ping` method acts as a constructor of a ping message object. 
       from: ...
     });
 
+The `new` keyword can be ommited when calling the contructor.
+
 ### Attribute `from` ###
 
 The `from` attribute is a reference to a string containing the name of the sender of the message.
@@ -345,6 +351,8 @@ The `JBus.messages.Bye` method acts as a constructor of a bye message object. Be
     new JBus.messages.Bye({
       from: ...
     });
+
+The `new` keyword can be ommited when calling the contructor.
 
 ### Attribute `from` ###
 
@@ -369,6 +377,8 @@ The `JBus.messages.Data` method acts as a constructor of a data message object. 
       name: ... ,
       payload: ... ,
     });
+
+The `new` keyword can be ommited when calling the contructor.
 
 ### Attribute `from` ###
 

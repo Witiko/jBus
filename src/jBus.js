@@ -66,6 +66,10 @@ var JBus = (function(debug) {
       function(options) {
 
         // Overloading support
+        if(!(this instanceof arguments.callee)) {
+          return new arguments.callee( options );
+        }
+        
         options = options || {};
 
         if(isString(options)) {
@@ -677,7 +681,14 @@ var JBus = (function(debug) {
       Collision:
         // @annotate Object `JBus.messages.Collision`
         function() {
+        
+          // Overloading support
+          if(!(this instanceof arguments.callee)) {
+            return new arguments.callee();
+          }
+          
           this.type = MESSAGES.ENUMS.COLLISION;
+          
         },
       
       Bonjour:
@@ -685,7 +696,12 @@ var JBus = (function(debug) {
         function( options ) {
         
           // Overloading support
+          if(!(this instanceof arguments.callee)) {
+            return new arguments.callee( options );
+          }
+          
           options = options || {};
+          
           if( typeof options !== "object" ||
               !("from" in options) ) {
             options = {
@@ -710,7 +726,12 @@ var JBus = (function(debug) {
         function( options ) {
         
           // Overloading support
+          if(!(this instanceof arguments.callee)) {
+            return new arguments.callee( options );
+          }
+          
           options = options || {};
+          
           if( typeof options !== "object" ||
               !("from" in options) ) {
             options = {
@@ -734,7 +755,12 @@ var JBus = (function(debug) {
         function( options ) {
         
           // Overloading support
+          if(!(this instanceof arguments.callee)) {
+            return new arguments.callee( options );
+          }
+          
           options = options || {};
+          
           if( typeof options !== "object" ||
               !("from" in options) ) {
             options = {
@@ -758,6 +784,10 @@ var JBus = (function(debug) {
         function( options ) {
           
           // Overloading support
+          if(!(this instanceof arguments.callee)) {
+            return new arguments.callee( options );
+          }
+          
           options = options || {};
           
           // Type checking

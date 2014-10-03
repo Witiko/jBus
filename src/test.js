@@ -8,12 +8,33 @@ var tests = {
       } else {
         failure();
       }
+    }, "Object JBus.messages.Collision construction (w/o new keyword)": function(success, failure) {
+      /* We construct a message object and check it has been correctly constructed. */
+      if( JBus.messages.Collision().type === 0x00 ) {
+        success();
+      } else {
+        failure();
+      }
     }, "Object JBus.messages.Bonjour construction": function(success, failure) {
       /* We construct a message object and check it has been correctly constructed. */
       var options = {
         from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
         description: "<name.witiko.jbus.testsuite.description@" + $String.random() + ">"
       }, msg = new JBus.messages.Bonjour( options );
+      
+      if( msg.type === 0x01 &&
+          msg.from === options.from &&
+          msg.description === options.description ) {
+        success();
+      } else {
+        failure();
+      }
+    }, "Object JBus.messages.Bonjour construction (w/o new keyword)": function(success, failure) {
+      /* We construct a message object and check it has been correctly constructed. */
+      var options = {
+        from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
+        description: "<name.witiko.jbus.testsuite.description@" + $String.random() + ">"
+      }, msg = JBus.messages.Bonjour( options );
       
       if( msg.type === 0x01 &&
           msg.from === options.from &&
@@ -34,6 +55,18 @@ var tests = {
         failure();
       }
     }, "Object JBus.messages.Ping construction": function(success, failure) {
+      /* We construct a message object and check it has been correctly constructed. */
+      var options = {
+        from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">"
+      }, msg = new JBus.messages.Ping( options );
+      
+      if( msg.type === 0x02 &&
+          msg.from === options.from ) {
+        success();
+      } else {
+        failure();
+      }
+    }, "Object JBus.messages.Ping construction (w/o new keyword)": function(success, failure) {
       /* We construct a message object and check it has been correctly constructed. */
       var options = {
         from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">"
@@ -68,6 +101,18 @@ var tests = {
       } else {
         failure();
       }
+    }, "Object JBus.messages.Bye construction (w/o new keyword)": function(success, failure) {
+      /* We construct a message object and check it has been correctly constructed. */
+      var options = {
+        from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">"
+      }, msg = JBus.messages.Bye( options );
+      
+      if( msg.type === 0x03 &&
+          msg.from === options.from ) {
+        success();
+      } else {
+        failure();
+      }
     }, "Object JBus.messages.Bye construction (overload #1)": function(success, failure) {
       /* We construct a message object and check it has been correctly constructed. */
       var from = "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
@@ -80,6 +125,23 @@ var tests = {
         failure();
       }
     }, "Object JBus.messages.Data construction": function(success, failure) {
+      /* We construct a message object and check it has been correctly constructed. */
+      var options = {
+        from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
+        name: getRandomName(),
+        payload: "<name.witiko.jbus.testsuite.payload@" + $String.random() + ">"
+      }, msg = new JBus.messages.Data( options );
+      
+      if( msg.type === 0x04 &&
+          msg.from === options.from && 
+          msg.data &&
+          msg.data.name === options.name &&
+          msg.data.payload === options.payload ) {
+        success();
+      } else {
+        failure();
+      }
+    }, "Object JBus.messages.Data construction (w/o new keyword)": function(success, failure) {
       /* We construct a message object and check it has been correctly constructed. */
       var options = {
         from: "<name.witiko.jbus.testsuite.from@" + $String.random() + ">",
@@ -152,6 +214,15 @@ var tests = {
       /* We construct a new node without dependencies
          and wait for it to autoinitialize. */
       new JBus.Node({
+        oninit: function() {
+          success();
+          this.destroy();
+        }
+      });
+    }, "Object JBus.Node construction, attribute oninit (w/o new keyword)": function(success, failure) {
+      /* We construct a new node without dependencies
+         and wait for it to autoinitialize. */
+      JBus.Node({
         oninit: function() {
           success();
           this.destroy();
