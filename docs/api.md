@@ -217,7 +217,7 @@ Below are the conditions for passing a filter for different types of filters:
 
 The `new JBus.Node().listen` method supports the following shorthand overloads:
 
-  * `new JBus.Node().listen(all)`, where `all` is a function, is equal to calling `new JBus.Node().listen({ all: all })`
+  * `new JBus.Node().listen(any)`, where `any` is a function, is equal to calling `new JBus.Node().listen({ any: any })`
 
 ## Method `new JBus.Node().toString` ##
 
